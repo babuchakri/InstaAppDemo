@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "142796807815",
+    "project_id": "login-ff2e5",
+    "storage_bucket": "login-ff2e5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142796807815:android:82af02291424b24a596222",
+        "android_client_info": {
+          "package_name": "com.example.login_form_one"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI0VvqY0APEw51IzHOU_6lazWbEiW6XQ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142796807815:android:8f2af1ed413ed834596222",
+        "android_client_info": {
+          "package_name": "com.login.login_form"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI0VvqY0APEw51IzHOU_6lazWbEiW6XQ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
