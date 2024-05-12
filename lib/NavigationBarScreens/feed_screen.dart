@@ -25,12 +25,18 @@ class _FeedScreenState extends State<FeedScreen> {
             color: Colors.white,
             size: 25,
           ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid)),
-            );
-          },
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileScreen(
+                    uid: FirebaseAuth.instance.currentUser!.uid,
+                    currentUserId: FirebaseAuth.instance.currentUser!.uid,
+                  ),
+                ),
+              );
+            }
+
         ),
         title: const Text(
           "connect",

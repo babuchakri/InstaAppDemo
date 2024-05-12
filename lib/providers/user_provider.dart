@@ -1,41 +1,63 @@
-
-
-import 'package:flutter/cupertino.dart';
-import 'package:login_form_one/models/user.dart';
-import 'package:login_form_one/resources/auth_models.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import '../models/user.dart';
+import '../resources/auth_models.dart';
 
 class UserProvider with ChangeNotifier {
-User? _user;
+  User? _user;
+  List<User> _selectedUserProfiles = [];
+  List<User> _friends = [];
 
+  User? get getUser => _user;
 
-User? _selectedUserProfile; // Add a variable to store the selected user's profile
+  List<User> get getSelectedUserProfiles => _selectedUserProfiles;
 
-final AuthMethods _authMethods = AuthMethods();
+  List<User> get friends => _friends;
 
-User? get getUser => _user;
+  final AuthMethods _authMethods = AuthMethods();
 
-
-
-User? get getSelectedUserProfile => _selectedUserProfile; // Getter for selected user's profile
-
-// Method to refresh the current user's profile
-Future<void> refreshUser() async {
-  User user = await _authMethods.getUserDetails();
-  _user = user;
-  notifyListeners();
-}
+  Future<void> refreshUser() async {
+    try {
+      User user = await _authMethods.getUserDetails();
+      setUser(user);
+    } catch (error) {
+      print('Error refreshing user: $error');
+    }
+  }
 
   void setUser(User newUser) {
     _user = newUser;
     notifyListeners();
   }
-// Method to set the selected user's profile
-void setSelectedUserProfile(User user) {
-  _selectedUserProfile = user;
-  notifyListeners();
+
+  void setSelectedUserProfile(User user) {
+    if (!_selectedUserProfiles.contains(user)) {
+      _selectedUserProfiles.add(user);
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchFriends(String? currentUserId) async {
+    if (currentUserId == null) {
+      print('Current user ID is null');
+      return;
+    }
+
+    try {
+      _friends.clear();
+      QuerySnapshot<Map<String, dynamic>> friendsSnapshot = await FirebaseFirestore.instance
+          .collection('friends')
+          .doc(currentUserId)
+          .collection('user_friends')
+          .get();
+
+      _friends = friendsSnapshot.docs
+          .map((doc) => User.fromSnapshot(doc))
+          .toList();
+
+      notifyListeners();
+    } catch (error) {
+      print('Error fetching friends: $error');
+    }
+  }
 }
-}
-
-
-
-

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,8 +7,6 @@ import '../models/user.dart' as CustomUser;
 import 'dart:math';
 import '../providers/user_provider.dart';
 
-
-
 class ConnectScreen extends StatefulWidget {
   const ConnectScreen({Key? key}) : super(key: key);
 
@@ -18,8 +15,6 @@ class ConnectScreen extends StatefulWidget {
 }
 
 class _ConnectScreenState extends State<ConnectScreen> {
- // bool _isPressed = false; // Define _isPressed variable
-
   Position? _currentPosition;
   final List<CustomUser.User> _nearbyUsers = [];
   bool _isLoading = false;
@@ -28,52 +23,42 @@ class _ConnectScreenState extends State<ConnectScreen> {
   @override
   void initState() {
     super.initState();
-    // Ask for location permission and enable location services when the screen is first loaded
     _checkLocationPermission();
   }
 
   void _checkLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled, show dialog to enable
       _showLocationServiceDisabledDialog();
     } else {
-      // Location services are enabled, check permission
       _askLocationPermission();
     }
   }
 
   void _askLocationPermission() async {
-    // Show dialog to request location permission
     LocationPermission permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      // Permission denied, handle accordingly
       _showLocationPermissionDeniedDialog();
     } else {
-      // Permission granted, start updating location
       _updateLocation();
     }
   }
 
   void _updateLocation() {
-    // Set up continuous location updates
     Geolocator.getPositionStream().listen((Position position) async {
       if (mounted) {
-        // Check if the widget is still mounted
         setState(() {
           _currentPosition = position;
           if (!_isLoading) {
-            _updateNearbyUsers(); // Update nearby users whenever the location changes
+            _updateNearbyUsers();
           }
         });
 
-        // Update the current user's location in Firestore
         if (_currentPosition != null) {
           double currentLat = _currentPosition!.latitude;
           double currentLong = _currentPosition!.longitude;
 
-          // Update the user's location in Firestore
           await FirebaseFirestore.instance
               .collection('users')
               .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -98,9 +83,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                // Open location settings
                 await Geolocator.openLocationSettings();
-                // Check location permission after enabling location services
                 _checkLocationPermission();
               },
               child: const Text("OK"),
@@ -138,12 +121,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
       QuerySnapshot usersSnapshot =
       await FirebaseFirestore.instance.collection('users').get();
 
-      // Get the current user's location
       if (_currentPosition != null) {
         double currentLat = _currentPosition!.latitude;
         double currentLong = _currentPosition!.longitude;
-
-        // Get the current user's ID
         String currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
         for (var doc in usersSnapshot.docs) {
@@ -151,7 +131,6 @@ class _ConnectScreenState extends State<ConnectScreen> {
             doc as DocumentSnapshot<Map<String, dynamic>>,
           );
 
-          // Check if the user's document has latitude and longitude fields
           Map<String, dynamic>? userData = doc.data() as Map<String, dynamic>?;
 
           if (userData != null &&
@@ -160,7 +139,6 @@ class _ConnectScreenState extends State<ConnectScreen> {
             double userLatitude = userData['latitude'];
             double userLongitude = userData['longitude'];
 
-            // Calculate the distance between the current user and the other user
             double distanceInMeters = Geolocator.distanceBetween(
               currentLat,
               currentLong,
@@ -168,7 +146,6 @@ class _ConnectScreenState extends State<ConnectScreen> {
               userLongitude,
             );
 
-            // If the distance is within or equal to 20 meters and the user is not the current user, add the user to the nearby users list
             if (distanceInMeters <= 20 && doc.id != currentUserId) {
               _nearbyUsers.add(user);
             }
@@ -180,13 +157,11 @@ class _ConnectScreenState extends State<ConnectScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      // Handle errors
       print('Error fetching nearby users: $e');
       setState(() {
         _isLoading = false;
       });
       if (_nearbyUsers.isEmpty) {
-        // Trigger rebuild of widget to show "No nearby users found" message
         setState(() {});
       }
     }
@@ -195,17 +170,17 @@ class _ConnectScreenState extends State<ConnectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Set background color to black
+      backgroundColor: Colors.black,
       body: SafeArea(
-        // Wrap the body with SafeArea
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _nearbyUsers.isEmpty
             ? const Center(
-            child: Text(
-              'No nearby users found',
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ))
+          child: Text(
+            'No nearby users found',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
             : _buildNearbyUsersList(),
       ),
     );
@@ -217,11 +192,11 @@ class _ConnectScreenState extends State<ConnectScreen> {
           .where((user) => _isWithinRange(user.latitude, user.longitude, 20))
           .map((user) {
         double left = _random.nextDouble() *
-            (MediaQuery.of(context).size.width -
-                80); // Subtracting avatar radius
+            (MediaQuery.of(context).size.width - 80);
         double top = _random.nextDouble() *
             (MediaQuery.of(context).size.height -
-                80); // Subtracting avatar radius
+                MediaQuery.of(context).padding.bottom -
+                80);
         return Positioned(
           left: left,
           top: top,
@@ -230,7 +205,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
               _showUserProfileDialog(user);
             },
             child: CircleAvatar(
-              radius: 35, // Increase size of circle avatar
+              radius: 30,
               backgroundColor: Colors.white,
               backgroundImage: NetworkImage(user.photoUrl),
             ),
@@ -257,18 +232,21 @@ class _ConnectScreenState extends State<ConnectScreen> {
   }
 
   void _showUserProfileDialog(CustomUser.User user) {
+    bool userAlreadyAdded = Provider.of<UserProvider>(context, listen: false)
+        .getSelectedUserProfiles
+        .any((selectedUser) => selectedUser.uid == user.uid);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
-          child: SizedBox(
-            height: 300, // Adjust the height as needed
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context)
-                    .pop(); // Dismiss the dialog when tapped outside
-              },
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: SizedBox(
+              height: 300,
               child: Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(5.0),
@@ -278,7 +256,6 @@ class _ConnectScreenState extends State<ConnectScreen> {
                       border: Border.all(color: Colors.grey, width: 0.0),
                     ),
                     child: SingleChildScrollView(
-                      // Wrap the Column with SingleChildScrollView
                       child: Container(
                         padding: EdgeInsets.all(16),
                         child: Column(
@@ -300,31 +277,60 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                         Icons.people_alt_rounded,
                                         color: Colors.white,
                                       ),
-                                      onPressed: () {
-                                        // Change color to green when pressed
-                                        setState(() {
-                                          //_isPressed = true;
-                                        });
+                                      onPressed: userAlreadyAdded
+                                          ? null
+                                          : () async {
+                                        String currentUserId =
+                                            FirebaseAuth.instance
+                                                .currentUser!.uid;
+                                        DocumentReference friendRef =
+                                        FirebaseFirestore.instance
+                                            .collection('friends')
+                                            .doc(currentUserId)
+                                            .collection('user_friends')
+                                            .doc(user.uid);
 
-                                        // Store the selected user's profile in UserProvider
-                                        Provider.of<UserProvider>(context, listen: false)
-                                            .setSelectedUserProfile(user);
-                                        Navigator.of(context).pop(); // Close the dialog
-
-                                        // Show a Snackbar indicating that the user has been added to the friends list
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('User added to friends list'),
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
+                                        try {
+                                          await friendRef.set({
+                                            'username': user.username,
+                                            'uid': user.uid,
+                                            'email': user.email,
+                                          });
+                                          setState(() {});
+                                          Provider.of<UserProvider>(
+                                              context,
+                                              listen: false)
+                                              .setSelectedUserProfile(
+                                              user);
+                                          Navigator.of(context).pop();
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  'User added to friends list'),
+                                              duration:
+                                              Duration(seconds: 2),
+                                            ),
+                                          );
+                                        } catch (e) {
+                                          print(
+                                              'Error adding friend: $e');
+                                        }
                                       },
-
                                     ),
-                                    const Text('Connect',
-                                        style: TextStyle(color: Colors.white)),
+                                    Text(
+                                      userAlreadyAdded
+                                          ? 'connected'
+                                          : 'Connect',
+                                      style: TextStyle(
+                                        color: userAlreadyAdded
+                                            ? Colors.grey
+                                            : Colors.white,
+                                      ),
+                                    ),
                                   ],
                                 ),
+
                                 Column(
                                   children: [
                                     IconButton(
@@ -386,6 +392,3 @@ class _ConnectScreenState extends State<ConnectScreen> {
     );
   }
 }
-
-
-
