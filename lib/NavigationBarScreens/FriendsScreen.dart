@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/user.dart';
 import '../providers/user_provider.dart';
-import 'profile_screen.dart';
+import 'profile_screen.dart'; // Import the ProfileScreen
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -14,6 +14,7 @@ class FriendsScreen extends StatefulWidget {
 
 class _FriendsScreenState extends State<FriendsScreen> {
   String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -76,35 +77,35 @@ class _FriendsScreenState extends State<FriendsScreen> {
           ),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          // Display current user profile
-          Consumer<UserProvider>(
-            builder: (context, userProvider, child) {
-              User? currentUser = userProvider.getUser;
-              return currentUser != null
-                  ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20),
-                    child: UserProfile(
-                      user: currentUser,
-                      isCurrentUser: true,
-                    ), // Pass true for the current user
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              )
-                  : const SizedBox.shrink();
-            },
-          ),
-          const SizedBox(height: 10),
-          // Display selected user profiles
-          Expanded(
-            child: Consumer<UserProvider>(
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            // Display current user profile
+            Consumer<UserProvider>(
+              builder: (context, userProvider, child) {
+                User? currentUser = userProvider.getUser;
+                return currentUser != null
+                    ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: UserProfile(
+                        user: currentUser,
+                        isCurrentUser: true,
+                      ), // Pass true for the current user
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                )
+                    : const SizedBox.shrink();
+              },
+            ),
+            const SizedBox(height: 10),
+            // Display selected user profiles
+            Consumer<UserProvider>(
               builder: (context, userProvider, child) {
                 List<User>? selectedUsers =
                     userProvider.getSelectedUserProfiles;
@@ -116,41 +117,32 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       .contains(_searchQuery.toLowerCase()))
                       .toList();
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                    child: Wrap(
-                      spacing: 63.0, // Horizontal spacing between user profiles
-                      runSpacing:
-                      25.0, // Vertical spacing between user profiles
-                      children: [
-                        for (int i = 0; i < filteredUsers.length; i += 3)
-                          _buildUserRow(filteredUsers.sublist(i, i + 3)),
-                      ],
-                    ),
-                  );
+                  return _buildUserRows(filteredUsers);
                 } else {
                   return const SizedBox.shrink();
                 }
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildUserRow(List<User> users) {
-    return Row(
-      children: users
-          .map(
-            (user) => Expanded(
+  Widget _buildUserRows(List<User> users) {
+    List<Widget> rows = [];
+    List<Widget> currentRowUsers = [];
+
+    for (int i = 0; i < users.length; i++) {
+      currentRowUsers.add(
+        Expanded(
           child: GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProfileScreen(
-                    uid: user.uid,
+                    uid: users[i].uid,
                     currentUserId: '',
                   ),
                 ),
@@ -158,12 +150,30 @@ class _FriendsScreenState extends State<FriendsScreen> {
             },
             child: Padding(
               padding: const EdgeInsets.only(right: 12.0),
-              child: UserProfile(user: user),
+              child: UserProfile(user: users[i]),
             ),
           ),
         ),
-      )
-          .toList(),
+      );
+
+      // If the current row is full or it's the last user, add the row to the list of rows
+      if (currentRowUsers.length == 3 || i == users.length - 1) {
+        rows.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 30.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: currentRowUsers,
+            ),
+          ),
+        );
+        currentRowUsers = []; // Clear the current row users list for the next row
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: rows,
     );
   }
 }
@@ -184,11 +194,10 @@ class UserProfile extends StatelessWidget {
       children: [
         CircleAvatar(
           backgroundImage: NetworkImage(user.photoUrl),
-          radius: 30,
+          radius: 32,
           backgroundColor: isCurrentUser
               ? Colors.grey
-              : Colors
-              .transparent, // Example: Set background color for the current user
+              : Colors.transparent, // Example: Set background color for the current user
         ),
         const SizedBox(height: 5),
         Text(
