@@ -62,19 +62,36 @@ class _EmailPasswordScreenState extends State<EmailPasswordScreen> {
               onPressed: () {
                 String email = _emailController.text;
                 String password = _passwordController.text;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PhoneNumberScreen(
-                      name: widget.name,
-                      birth: widget.birth,
-                      gender: widget.gender,
-                      email: email,
-                      password: password,
+                if (email.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Email is required'),
+                      backgroundColor: Colors.red,
                     ),
-                  ),
-                );
+                  );
+                } else if (password.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Password is required'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PhoneNumberScreen(
+                        name: widget.name,
+                        birth: widget.birth,
+                        gender: widget.gender,
+                        email: email,
+                        password: password,
+                      ),
+                    ),
+                  );
+                }
               },
+
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(

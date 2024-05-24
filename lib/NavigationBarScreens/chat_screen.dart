@@ -1,54 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'individual_chat_screen.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String currentUserId;
+
+  const ChatScreen({Key? key, required this.currentUserId}) : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  // Existing code...
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 35,
-                padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF323232),
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.search_rounded, color: Colors.white70),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: "Search",
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          isCollapsed: true,
-                        ),
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        title: const Text('Chats'),
+      ),
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance.collection('conversations').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final conversations = snapshot.data?.docs ?? [];
+
+          return ListView.builder(
+            itemCount: conversations.length,
+            itemBuilder: (context, index) {
+              final conversation = conversations[index];
+              final members = conversation['members'] as List<dynamic>;
+
+              // Check if the current user is a part of this conversation
+              if (members.contains(widget.currentUserId)) {
+                final otherUserId = members.firstWhere((id) => id != widget.currentUserId);
+                return ListTile(
+                  title: Text('Conversation with $otherUserId'), // You can display other user's name here
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => IndividualChatScreen(uid: otherUserId, currentUserId: '',)),
+                    );
+                  },
+                );
+              } else {
+                return Container();
+              }
+            },
+          );
+        },
       ),
     );
   }

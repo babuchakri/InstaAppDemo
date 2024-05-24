@@ -1,10 +1,13 @@
+// ProfileScreen.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
+import 'individual_chat_screen.dart'; // Import IndividualChatScreen
+
 class ProfileScreen extends StatefulWidget {
   final String uid;
-  final String currentUserId; // Add currentUserId field
+  final String currentUserId;
 
   const ProfileScreen({Key? key, required this.uid, required this.currentUserId}) : super(key: key);
 
@@ -28,10 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     try {
-      var snap = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.uid)
-          .get();
+      var snap = await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
       userData = snap.data() as Map<String, dynamic>;
     } catch (e) {
       // Handle error
@@ -50,12 +50,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context); // Navigate back to the previous screen
+            Navigator.pop(context);
           },
         ),
         title: const Text(
@@ -66,29 +63,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         actions: [
-          widget.currentUserId == widget.uid // Checking if it's the current user's profile
-              ? IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SettingsScreen(
-
-                  ),
-                ),
-              );
-              // Handle settings
-            },
-          )
-              : IconButton(
-            icon: const Icon(Icons.message_rounded, color: Colors.white), // Display message icon for other users
-            onPressed: () {
-              // Handle message
-            },
-          ),
+          if (widget.currentUserId == widget.uid)
+            IconButton(
+              icon: const Icon(Icons.settings, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                );
+              },
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.send, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => IndividualChatScreen(uid: widget.uid, currentUserId: '',)),
+                );
+              },
+            ),
           IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white), // Display more_vert icon
+            icon: const Icon(Icons.more_vert, color: Colors.white),
             onPressed: () {
               // Handle more options
             },
@@ -96,9 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: isLoading
-          ? const Center(
-        child: CircularProgressIndicator(),
-      )
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -109,9 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: NetworkImage(
-                    userData['photoUrl'] ?? '',
-                  ),
+                  backgroundImage: NetworkImage(userData['photoUrl'] ?? ''),
                 ),
                 const SizedBox(width: 20),
                 Column(
@@ -154,11 +146,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
+                    const Text(
                       'Connected',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: Colors.grey,
                       ),
                     ),
                   ],
@@ -174,11 +166,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
+                    const Text(
                       'Hearts',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: Colors.grey,
                       ),
                     ),
                   ],
@@ -194,11 +186,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
+                    const Text(
                       'Likes',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: Colors.grey,
                       ),
                     ),
                   ],
@@ -216,16 +208,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 10),
             FutureBuilder(
-              future: FirebaseFirestore.instance
-                  .collection('posts')
-                  .where('uid', isEqualTo: widget.uid)
-                  .get(),
+              future: FirebaseFirestore.instance.collection('posts').where('uid', isEqualTo: widget.uid).get(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
                 return Wrap(
                   spacing: 5,
@@ -233,8 +219,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     for (var doc in snapshot.data!.docs)
                       Container(
-                        width: (MediaQuery.of(context).size.width - 50) / 3, // Adjusting width to fit three photos
-                        height: (MediaQuery.of(context).size.width - 50) / 3, // Adjusting height to maintain aspect ratio
+                        width: (MediaQuery.of(context).size.width - 50) / 3,
+                        height: (MediaQuery.of(context).size.width - 50) / 3,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           image: DecorationImage(

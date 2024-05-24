@@ -61,6 +61,16 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
   }
 
   void signUpUser() async {
+    if (_image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile pic is required'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -97,6 +107,7 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
       showSnackBar(res, context);
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

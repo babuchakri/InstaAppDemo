@@ -57,21 +57,32 @@ class _BioScreenState extends State<BioScreen> {
             child: ElevatedButton(
               onPressed: () {
                 String bio = _bioController.text;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProfilePickerScreen(
-                      name: widget.name,
-                      birth: widget.birth,
-                      gender: widget.gender,
-                      email: widget.email,
-                      password: widget.password,
-                      phone: widget.phone,
-                      bio: bio,
+                List<String> lines = bio.split('\n');
+                if (lines.length < 3) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a bio with at least three lines'),
+                      backgroundColor: Colors.red,
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfilePickerScreen(
+                        name: widget.name,
+                        birth: widget.birth,
+                        gender: widget.gender,
+                        email: widget.email,
+                        password: widget.password,
+                        phone: widget.phone,
+                        bio: bio,
+                      ),
+                    ),
+                  );
+                }
               },
+
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(

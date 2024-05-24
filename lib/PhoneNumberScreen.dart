@@ -54,20 +54,37 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
             child: ElevatedButton(
               onPressed: () {
                 String phone = _phoneNumberController.text;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BioScreen(
-                      name: widget.name,
-                      birth: widget.birth,
-                      gender: widget.gender,
-                      email: widget.email,
-                      password: widget.password,
-                      phone: phone,
+                if (phone.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Phone number is required'),
+                      backgroundColor: Colors.red,
                     ),
-                  ),
-                );
+                  );
+                } else if (phone.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(phone)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid 10-digit phone number'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BioScreen(
+                        name: widget.name,
+                        birth: widget.birth,
+                        gender: widget.gender,
+                        email: widget.email,
+                        password: widget.password,
+                        phone: phone,
+                      ),
+                    ),
+                  );
+                }
               },
+
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(

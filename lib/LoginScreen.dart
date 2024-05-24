@@ -16,26 +16,28 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  String _errorMessage = '';
 
   void loginUser() async {
     setState(() {
       _isLoading = true;
+      _errorMessage = '';
     });
     String res = await AuthMethods().loginUser(
         email: _emailController.text, password: _passwordController.text);
 
     if (res == "success") {
       setState(() {
+        _isLoading = false;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-            const MobileScreen(),
+            builder: (context) => const MobileScreen(),
           ),
         );
       });
       Fluttertoast.showToast(
-        msg: 'Registration Successful',
+        msg: 'Login Successful',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 2,
@@ -44,11 +46,11 @@ class _LoginScreenState extends State<LoginScreen> {
         fontSize: 16.0,
       );
     } else {
-      showSnackBar(res, context);
+      setState(() {
+        _isLoading = false;
+        _errorMessage = res;
+      });
     }
-    setState(() {
-      _isLoading = true;
-    });
   }
 
   @override
@@ -58,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            setState(() {});
+            Navigator.pop(context);
           },
         ),
         title: const Text(
@@ -110,12 +112,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 16.0),
+                    if (_errorMessage.isNotEmpty)
+                      Text(
+                        _errorMessage,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    const SizedBox(height: 16.0),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {},
                         child: const Text(
-                          'Forgot Password ?',
+                          'Forgot Password?',
                           style: TextStyle(fontSize: 17),
                         ),
                       ),
@@ -123,7 +132,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16.0),
                     ElevatedButton(
                       onPressed: _isLoading ? null : loginUser,
-                      // Disable button when loading
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
@@ -132,29 +140,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: _isLoading
                           ? const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ) // Show circular progress indicator
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      )
                           : const Padding(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 12.0, horizontal: 24.0),
-                              child: Text(
-                                'Login',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25,
-                                ),
-                              ),
-                            ),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 24.0),
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25,
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16.0),
                     Center(
                       child: TextButton(
                         onPressed: () {},
                         child: const Text(
-                          "Don't have an account ?",
+                          "Don't have an account?",
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
@@ -166,15 +174,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     Center(
                       child: TextButton(
                         onPressed: () {
-                          setState(() {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const RegistrationScreen(),
-                              ),
-                            );
-                          });
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                              const RegistrationScreen(),
+                            ),
+                          );
                         },
                         child: const Text(
                           "Register Now",

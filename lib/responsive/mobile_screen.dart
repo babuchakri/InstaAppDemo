@@ -1,10 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:login_form_one/NavigationBarScreens/add_post_screen.dart';
 import 'package:login_form_one/NavigationBarScreens/chat_screen.dart';
 import 'package:login_form_one/NavigationBarScreens/connect_screen.dart';
 import 'package:login_form_one/NavigationBarScreens/feed_screen.dart';
-
 import '../NavigationBarScreens/FriendsScreen.dart';
 
 class MobileScreen extends StatefulWidget {
@@ -37,76 +35,70 @@ class _MobileScreenState extends State<MobileScreen> {
   }
 
   void navigationTapped(int page) {
-    //Animating Page
+    // Animating Page
     pageController.jumpToPage(page);
+    setState(() {
+      _page = page;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black, // Set background color to black
       body: PageView(
         controller: pageController,
         onPageChanged: onPageChanged,
         physics: const NeverScrollableScrollPhysics(),
-        children:  const [
+        children: const [
           ConnectScreen(),
           FeedScreen(),
           AddPostScreen(),
           FriendsScreen(),
-          ChatScreen(),
+          ChatScreen(currentUserId: '',),
         ],
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Thick line above the bottom navigation bar
+          Container(
+            height: 0.16, // Adjust the height of the line as needed
+            color: Colors.grey,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black,
-            ),
-          ],
-        ),
-        child: CupertinoTabBar(
-          backgroundColor: Colors.black,
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 4), // Add padding to move the icon down
-                child: Icon(Icons.location_history, size: 25, color: _page == 0 ? Colors.white : Colors.grey),
+          BottomNavigationBar(
+            backgroundColor: Colors.black, // Set bottom navigation bar background color to black
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Colors.white, // Set selected item color
+            unselectedItemColor: Colors.grey[500], // Set unselected item color
+            currentIndex: _page,
+            onTap: navigationTapped,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.location_history, size: 26),
+                label: 'connect',
               ),
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 4), // Add padding to move the icon down
-                child: Icon(Icons.home, size: 25, color: _page == 1 ? Colors.white : Colors.grey),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.explore, size: 26),
+                label: 'explore',
               ),
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 4), // Add padding to move the icon down
-                child: Icon(Icons.photo_camera, size: 25, color: _page == 2 ? Colors.white : Colors.grey),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add_circle, size: 26),
+                label: 'upload',
               ),
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 4), // Add padding to move the icon down
-                child: Icon(Icons.people, size: 25, color: _page == 3 ? Colors.white : Colors.grey),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.group, size: 26),
+                label: 'friends',
               ),
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 4), // Add padding to move the icon down
-                child: Icon(Icons.message, size: 25, color: _page == 4 ? Colors.white : Colors.grey),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble, size: 26),
+                label: 'chat',
               ),
-            ),
-          ],
-          onTap: navigationTapped,
-          currentIndex: _page,
-        ),
+            ],
+            selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white), // Adjust the selected label font size and weight
+            unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.normal), // Adjust the unselected label font size and weight
+          ),
+        ],
       ),
     );
   }

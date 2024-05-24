@@ -108,17 +108,34 @@ class _BirthGenderScreenState extends State<BirthGenderScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         String birth = _birthDateController.text;
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EmailPasswordScreen(
-                              name: widget.name,
-                              birth: birth,
-                              gender: selectedGender,
+                        if (birth.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Date of birth is required'),
+                              backgroundColor: Colors.red,
                             ),
-                          ),
-                        );
+                          );
+                        } else if (selectedGender.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please select gender'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmailPasswordScreen(
+                                name: widget.name,
+                                birth: birth,
+                                gender: selectedGender,
+                              ),
+                            ),
+                          );
+                        }
                       },
+
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(

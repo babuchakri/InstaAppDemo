@@ -7,7 +7,6 @@ import 'package:login_form_one/resources/storage_method.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<model.User> getUserDetails() async {
@@ -16,7 +15,18 @@ class AuthMethods {
     await _firestore.collection('users').doc(currentUser.uid).get();
     return model.User.fromSnapshot(snap);
   }
-
+  // Method to get the currently logged-in user
+  Future<model.User?> getCurrentUser() async {
+    User? currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      DocumentSnapshot<Map<String, dynamic>> snap = await _firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+      return model.User.fromSnapshot(snap);
+    }
+    return null;
+  }
   Future<String> signUpUser({
     required String email,
     required String password,
@@ -78,10 +88,10 @@ class AuthMethods {
         await _auth.signInWithEmailAndPassword(email: email, password: password);
         return "success";
       } else {
-        throw Exception("Please enter all the fields");
+        return "Please enter all the fields";
       }
     } catch (err) {
-      throw Exception("Failed to sign in: $err");
+      return "incorrect email or password please try again";
     }
   }
 }

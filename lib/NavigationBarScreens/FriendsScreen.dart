@@ -37,39 +37,42 @@ class _FriendsScreenState extends State<FriendsScreen> {
         backgroundColor: Colors.black,
         elevation: 0,
         title: Padding(
-          padding: const EdgeInsets.only(top: 16.0),
+          padding: const EdgeInsets.only(top: 58.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                height: 35,
-                padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF323232),
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search_rounded, color: Colors.white70),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: "Search",
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          isCollapsed: true,
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0), // Add padding at the bottom to move the search bar down
+                child: Container(
+                  height: 35,
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF323232),
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search_rounded, color: Colors.white70),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            hintText: "Search",
+                            hintStyle: TextStyle(color: Colors.grey),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            isCollapsed: true,
+                          ),
+                          style: const TextStyle(color: Colors.white),
                         ),
-                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -77,6 +80,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           ),
         ),
       ),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,13 +95,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 20),
+                      padding: const EdgeInsets.only(left: 25),
                       child: UserProfile(
                         user: currentUser,
                         isCurrentUser: true,
                       ), // Pass true for the current user
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 15),
                   ],
                 )
                     : const SizedBox.shrink();
@@ -160,7 +164,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       if (currentRowUsers.length == 3 || i == users.length - 1) {
         rows.add(
           Padding(
-            padding: const EdgeInsets.only(bottom: 30.0),
+            padding: const EdgeInsets.only(bottom: 20.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: currentRowUsers,
@@ -194,7 +198,7 @@ class UserProfile extends StatelessWidget {
       children: [
         CircleAvatar(
           backgroundImage: NetworkImage(user.photoUrl),
-          radius: 32,
+          radius: 30,
           backgroundColor: isCurrentUser
               ? Colors.grey
               : Colors.transparent, // Example: Set background color for the current user

@@ -8,6 +8,7 @@ import 'dart:math';
 import '../providers/user_provider.dart';
 
 class ConnectScreen extends StatefulWidget {
+
   const ConnectScreen({Key? key}) : super(key: key);
 
   @override
@@ -178,7 +179,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
             ? const Center(
           child: Text(
             'No nearby users found',
-            style: TextStyle(color: Colors.white, fontSize: 20),
+            style: TextStyle(color: Colors.black, fontSize: 20),
           ),
         )
             : _buildNearbyUsersList(),
@@ -187,16 +188,18 @@ class _ConnectScreenState extends State<ConnectScreen> {
   }
 
   Widget _buildNearbyUsersList() {
+    double bottomNavBarHeight = kBottomNavigationBarHeight;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Stack(
       children: _nearbyUsers
-          .where((user) => _isWithinRange(user.latitude, user.longitude, 20))
+          .where((user) =>
+          _isWithinRange(user.latitude, user.longitude, 20))
           .map((user) {
         double left = _random.nextDouble() *
             (MediaQuery.of(context).size.width - 80);
         double top = _random.nextDouble() *
-            (MediaQuery.of(context).size.height -
-                MediaQuery.of(context).padding.bottom -
-                80);
+            (screenHeight - MediaQuery.of(context).padding.bottom - bottomNavBarHeight - 90); // Adjusted height to avoid bottom navigation bar
         return Positioned(
           left: left,
           top: top,
@@ -204,17 +207,25 @@ class _ConnectScreenState extends State<ConnectScreen> {
             onTap: () {
               _showUserProfileDialog(user);
             },
-            child: CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.white,
-              backgroundImage: NetworkImage(user.photoUrl),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white,
+                  width: 0.7, // Adjust border width as needed
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 30,
+                backgroundColor: Colors.black,
+                backgroundImage: NetworkImage(user.photoUrl),
+              ),
             ),
           ),
         );
       }).toList(),
     );
   }
-
   bool _isWithinRange(double lat, double long, double range) {
     if (_currentPosition == null) return false;
 

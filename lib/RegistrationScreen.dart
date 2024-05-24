@@ -68,13 +68,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       child: ElevatedButton(
                         onPressed: () {
                           String name = _nameController.text;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BirthGenderScreen(name: name),
-                            ),
-                          );
+                          if (name.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Name is required'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BirthGenderScreen(name: name),
+                              ),
+                            );
+                          }
                         },
+
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
