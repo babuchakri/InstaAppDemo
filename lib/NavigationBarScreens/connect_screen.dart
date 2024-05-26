@@ -179,7 +179,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
             ? const Center(
           child: Text(
             'No nearby users found',
-            style: TextStyle(color: Colors.black, fontSize: 20),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         )
             : _buildNearbyUsersList(),

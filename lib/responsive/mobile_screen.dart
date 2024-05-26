@@ -50,12 +50,12 @@ class _MobileScreenState extends State<MobileScreen> {
         controller: pageController,
         onPageChanged: onPageChanged,
         physics: const NeverScrollableScrollPhysics(),
-        children: const [
+        children:  [
           ConnectScreen(),
           FeedScreen(),
           AddPostScreen(),
           FriendsScreen(),
-          ChatScreen(currentUserId: '',),
+          ChatScreen(),
         ],
       ),
       bottomNavigationBar: Column(
@@ -63,14 +63,14 @@ class _MobileScreenState extends State<MobileScreen> {
         children: [
           // Thick line above the bottom navigation bar
           Container(
-            height: 0.16, // Adjust the height of the line as needed
+            height: 0.20, // Adjust the height of the line as needed
             color: Colors.grey,
           ),
           BottomNavigationBar(
             backgroundColor: Colors.black, // Set bottom navigation bar background color to black
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Colors.white, // Set selected item color
-            unselectedItemColor: Colors.grey[500], // Set unselected item color
+            unselectedItemColor: Colors.grey[400], // Set unselected item color
             currentIndex: _page,
             onTap: navigationTapped,
             items: const <BottomNavigationBarItem>[

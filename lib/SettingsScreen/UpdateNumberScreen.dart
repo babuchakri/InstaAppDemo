@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdateNumberScreen extends StatefulWidget {
@@ -9,6 +11,40 @@ class UpdateNumberScreen extends StatefulWidget {
 }
 
 class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
+  final TextEditingController numberController = TextEditingController();
+  bool _isNumberUpdated = false;
+
+  void _updateNumber() async {
+    String newNumber = numberController.text.trim();
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (newNumber.isNotEmpty && currentUser != null) {
+      try {
+        // Update number in Firestore
+        await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+          'phoneNumber': newNumber,
+        });
+
+        setState(() {
+          _isNumberUpdated = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Number updated successfully')),
+        );
+
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update number: $e')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a valid number')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +61,6 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
               context,
               MaterialPageRoute(builder: (context) => const SettingsScreen()),
             );
-
           },
         ),
       ),
@@ -54,6 +89,7 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
             ),
             SizedBox(height: 16.0),
             TextField(
+              controller: numberController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Enter new number',
@@ -66,9 +102,7 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
-                // Add logic to update the number
-              },
+              onPressed: _updateNumber,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
@@ -79,7 +113,6 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: Text(
                   'Update',
-
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 23.0,
@@ -88,6 +121,18 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
                 ),
               ),
             ),
+            if (_isNumberUpdated)
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Text(
+                  'Number updated successfully',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.green,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
           ],
         ),
       ),

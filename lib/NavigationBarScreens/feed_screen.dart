@@ -3,8 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../widget/post_card.dart'; // Ensure PostCard is imported
+import 'package:cached_network_image/cached_network_image.dart';
 import 'profile_screen.dart';
+import '../widget/post_card.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({Key? key}) : super(key: key);
@@ -13,20 +14,27 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
-class _FeedScreenState extends State<FeedScreen> with SingleTickerProviderStateMixin {
+class _FeedScreenState extends State<FeedScreen>
+    with SingleTickerProviderStateMixin {
   final Map<String, double> postHeightFactors = {};
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 1, vsync: this); // Only one tab in this case
+    _tabController =
+        TabController(length: 1, vsync: this); // Only one tab in this case
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _refreshPosts() async {
+    // Implement logic to refresh posts
+    // For example, you can fetch new posts from the database
   }
 
   @override
@@ -64,7 +72,8 @@ class _FeedScreenState extends State<FeedScreen> with SingleTickerProviderStateM
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.white, size: 23),
+            icon:
+            const Icon(Icons.notifications, color: Colors.white, size: 23),
             onPressed: () {
               // Add your notification handling logic here
             },
@@ -72,79 +81,90 @@ class _FeedScreenState extends State<FeedScreen> with SingleTickerProviderStateM
           const ToggleButton(),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+      body: RefreshIndicator(
+        onRefresh: _refreshPosts,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            const Divider(
-              color: Colors.black,
-              height: 3,
-              thickness: 5,
-            ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    child: StreamBuilder(
-                      stream: FirebaseFirestore.instance.collection('posts').snapshots(),
-                      builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        var random = math.Random();
-                        return MasonryGridView.count(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 15,
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (context, index) {
-                            var snap = snapshot.data!.docs[index].data();
-                            String postId = snapshot.data!.docs[index].id;
-
-                            // Generate height factor only once per post
-                            if (!postHeightFactors.containsKey(postId)) {
-                              postHeightFactors[postId] = random.nextDouble();
-                            }
-
-                            snap['postHeightFactor'] = postHeightFactors[postId];
-
-                            return InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailPage(
-                                      imageUrl: snap['postUrl'],
-                                      username: snap['username'],
-                                      profImage: snap['profImage'],
-                                      description: snap['description'],                                    ),
-                                  ),
-                                );
-                              },
-                              child: PostCard(snap: snap), // Use PostCard here
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
+          child: Column(
+            children: [
+              const Divider(
+                color: Colors.black,
+                height: 3,
+                thickness: 5,
               ),
-            ),
-          ],
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('posts')
+                            .snapshots(),
+                        builder: (context,
+                            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
+                            snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          var random = math.Random();
+                          return MasonryGridView.count(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                            itemCount: snapshot.data!.docs.length,
+                            itemBuilder: (context, index) {
+                              var snap = snapshot.data!.docs[index].data();
+                              String postId = snapshot.data!.docs[index].id;
+
+                              // Generate height factor only once per post
+                              if (!postHeightFactors.containsKey(postId)) {
+                                postHeightFactors[postId] =
+                                    random.nextDouble();
+                              }
+
+                              snap['postHeightFactor'] =
+                              postHeightFactors[postId];
+
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailPage(
+                                        imageUrl: snap['postUrl'],
+                                        username: snap['username'],
+                                        profImage: snap['profImage'],
+                                        description: snap['description'],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: PostCard(snap: snap), // Use PostCard here
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -178,6 +198,7 @@ class _ToggleButtonState extends State<ToggleButton> {
     );
   }
 }
+
 class DetailPage extends StatelessWidget {
   final String imageUrl;
   final String username;
@@ -202,16 +223,23 @@ class DetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.network(imageUrl),
+                CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(0.0),
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Padding(
-                      padding: const EdgeInsets.only(left: 5.0), // Adjust left padding here
+                      padding: const EdgeInsets.only(left: 5.0),
+                      // Adjust left padding here
                       child: CircleAvatar(
                         radius: 20,
-                        backgroundImage: NetworkImage(profImage),
+                        backgroundImage: CachedNetworkImageProvider(profImage),
                       ),
                     ),
                     title: Text(
@@ -220,7 +248,7 @@ class DetailPage extends StatelessWidget {
                     ),
                     subtitle: Text(
                       description,
-                      style: const TextStyle(color: Colors.white,fontSize: 12),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),
                 ),

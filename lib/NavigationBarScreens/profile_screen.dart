@@ -1,9 +1,6 @@
-// ProfileScreen.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
-
-import 'individual_chat_screen.dart'; // Import IndividualChatScreen
 
 class ProfileScreen extends StatefulWidget {
   final String uid;
@@ -42,6 +39,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> refreshData() async {
+    await getData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,22 +67,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (widget.currentUserId == widget.uid)
             IconButton(
               icon: const Icon(Icons.settings, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SettingsScreen()),
                 );
+                await refreshData(); // Refresh data when returning from settings
               },
             )
           else
             IconButton(
               icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => IndividualChatScreen(uid: widget.uid, currentUserId: '',)),
-                );
-              },
+              onPressed: () {},
             ),
           IconButton(
             icon: const Icon(Icons.more_vert, color: Colors.white),

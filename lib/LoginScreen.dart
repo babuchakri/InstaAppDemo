@@ -3,7 +3,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:login_form_one/resources/auth_models.dart';
 import 'package:login_form_one/responsive/mobile_screen.dart';
 import 'RegistrationScreen.dart';
-import 'Utils/utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -57,15 +56,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text(
-          'Login',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+
+        title: Container(
+          margin: EdgeInsets.only(left: 25),
+          child: const Text(
+            'Login',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+          ),
         ),
       ),
       body: Center(

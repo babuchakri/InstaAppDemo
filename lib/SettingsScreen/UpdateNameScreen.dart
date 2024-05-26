@@ -1,8 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
-class UpdateNameScreen extends StatelessWidget {
+class UpdateNameScreen extends StatefulWidget {
   const UpdateNameScreen({Key? key}) : super(key: key);
+
+  @override
+  _UpdateNameScreenState createState() => _UpdateNameScreenState();
+}
+
+class _UpdateNameScreenState extends State<UpdateNameScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  bool _isNameUpdated = false;
+
+  void _updateName() async {
+    String newName = _nameController.text.trim();
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (newName.isNotEmpty && currentUser != null) {
+      try {
+        // Update name in Firestore
+        await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+          'username': newName,
+        });
+
+        setState(() {
+          _isNameUpdated = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Name updated successfully')),
+        );
+
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update name: $e')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a valid name')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +89,7 @@ class UpdateNameScreen extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             TextField(
+              controller: _nameController,
               decoration: InputDecoration(
                 labelText: 'Enter new name',
                 labelStyle: TextStyle(color: Colors.white), // Changed label text color to white
@@ -59,9 +101,7 @@ class UpdateNameScreen extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
-                // Add logic to update the name
-              },
+              onPressed: _updateName,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
@@ -80,6 +120,18 @@ class UpdateNameScreen extends StatelessWidget {
                 ),
               ),
             ),
+            if (_isNameUpdated)
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Text(
+                  'Name updated successfully',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.green,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
           ],
         ),
       ),

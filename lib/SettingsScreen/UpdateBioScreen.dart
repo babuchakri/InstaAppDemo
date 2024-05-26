@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdateBioScreen extends StatefulWidget {
@@ -10,6 +12,38 @@ class UpdateBioScreen extends StatefulWidget {
 
 class _UpdateBioScreenState extends State<UpdateBioScreen> {
   final TextEditingController bioController = TextEditingController();
+  bool _isBioUpdated = false;
+
+  void _updateBio() async {
+    String newBio = bioController.text.trim();
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (newBio.isNotEmpty && currentUser != null) {
+      try {
+        // Update bio in Firestore
+        await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+          'bio': newBio,
+        });
+
+        setState(() {
+          _isBioUpdated = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Bio updated successfully')),
+        );
+
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update bio: $e')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a valid bio')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,9 +102,7 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
-                // Add logic to update the bio
-              },
+              onPressed: _updateBio,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
@@ -89,6 +121,18 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
                 ),
               ),
             ),
+            if (_isBioUpdated)
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Text(
+                  'Bio updated successfully',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.green,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
           ],
         ),
       ),

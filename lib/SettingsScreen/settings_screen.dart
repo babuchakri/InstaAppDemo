@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login_form_one/SettingsScreen/UpdateProfilePhoto.dart';
 
 import '../LoginScreen.dart';
 import 'SuggestionsScreen.dart';
@@ -43,7 +44,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildSectionHeading('Account Settings'),
-            _buildSettingsItem('Update Profile', Icons.person, () {}),
+            _buildSettingsItem('Update Profile', Icons.person, () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const UpdateProfilePhoto()),
+              );
+            }),
             _buildSettingsItem('Update Name', Icons.person_outline, () {
               Navigator.pushReplacement(
                 context,

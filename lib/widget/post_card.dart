@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PostCard extends StatelessWidget {
   final Map<String, dynamic> snap;
@@ -18,10 +19,12 @@ class PostCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          snap['postUrl'],
+        child: CachedNetworkImage(
+          imageUrl: snap['postUrl'],
           fit: BoxFit.contain, // Adjust the fit to contain to maintain aspect ratio
           width: double.infinity,
+          placeholder: (context, url) => SizedBox.shrink(), // Empty SizedBox as placeholder
+          errorWidget: (context, url, error) => const Icon(Icons.error),
         ),
       ),
     );

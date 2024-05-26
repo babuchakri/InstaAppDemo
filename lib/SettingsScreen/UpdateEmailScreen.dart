@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdateEmailScreen extends StatefulWidget {
@@ -9,6 +11,77 @@ class UpdateEmailScreen extends StatefulWidget {
 }
 
 class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _verificationEmailSent = false;
+  bool _emailUpdated = false;
+
+  void _updateEmail() async {
+    String newEmail = _emailController.text.trim();
+
+    if (newEmail.isNotEmpty) {
+      try {
+        User? currentUser = _auth.currentUser;
+        if (currentUser != null) {
+          // Send email verification before updating email
+          await currentUser.verifyBeforeUpdateEmail(newEmail);
+
+          setState(() {
+            _verificationEmailSent = true;
+            _emailUpdated = false; // Reset email updated flag
+          });
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send verification email: $e')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a valid email')),
+      );
+    }
+  }
+
+  Future<void> _checkEmailVerified() async {
+    User? currentUser = _auth.currentUser;
+
+    if (currentUser != null && currentUser.emailVerified) {
+      try {
+        // Update email in Firestore
+        await _firestore.collection('users').doc(currentUser.uid).update({
+          'email': currentUser.email,
+        });
+
+        setState(() {
+          _emailUpdated = true;
+          _verificationEmailSent = false; // Hide verification message
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Email updated successfully')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update email in Firestore: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Periodically check if the email is verified
+    _auth.userChanges().listen((User? user) {
+      if (user != null && _verificationEmailSent) {
+        _checkEmailVerified();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,6 +126,7 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
             ),
             SizedBox(height: 16.0),
             TextField(
+              controller: _emailController,
               decoration: InputDecoration(
                 labelText: 'Enter new email',
                 labelStyle: TextStyle(color: Colors.white),
@@ -64,9 +138,7 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
-                // Add logic to update the email
-              },
+              onPressed: _updateEmail,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
@@ -85,6 +157,22 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
                 ),
               ),
             ),
+            if (_verificationEmailSent) ...[
+              SizedBox(height: 16.0),
+              Text(
+                'Verification link sent to your email. Please verify.',
+                style: TextStyle(color: Colors.yellow),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (_emailUpdated) ...[
+              SizedBox(height: 16.0),
+              Text(
+                'Email updated successfully!',
+                style: TextStyle(color: Colors.green),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ],
         ),
       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdatePasswordScreen extends StatefulWidget {
@@ -9,6 +11,64 @@ class UpdatePasswordScreen extends StatefulWidget {
 }
 
 class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _isPasswordUpdated = false;
+
+  void _updatePassword() async {
+    String currentPassword = _currentPasswordController.text.trim();
+    String newPassword = _newPasswordController.text.trim();
+
+    if (currentPassword.isNotEmpty && newPassword.isNotEmpty) {
+      try {
+        User? currentUser = _auth.currentUser;
+
+        if (currentUser != null) {
+          // Reauthenticate the user
+          AuthCredential credential = EmailAuthProvider.credential(
+            email: currentUser.email!,
+            password: currentPassword,
+          );
+
+          await currentUser.reauthenticateWithCredential(credential);
+
+          // Update the password
+          await currentUser.updatePassword(newPassword);
+
+          // Update the password in Firestore
+          await _firestore.collection('users').doc(currentUser.uid).update({
+            'password': newPassword,
+          });
+
+          setState(() {
+            _isPasswordUpdated = true;
+          });
+
+          // Show a success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Password updated successfully', style: TextStyle(color: Colors.green))),
+          );
+
+          // Navigate back to settings screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const SettingsScreen()),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update password: $e', style: TextStyle(color: Colors.red))),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter both current and new password', style: TextStyle(color: Colors.red))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +85,6 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
               context,
               MaterialPageRoute(builder: (context) => const SettingsScreen()),
             );
-
           },
         ),
       ),
@@ -54,6 +113,21 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
             ),
             SizedBox(height: 16.0),
             TextField(
+              controller: _currentPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Enter current password',
+                labelStyle: TextStyle(color: Colors.white),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              style: TextStyle(color: Colors.white),
+              obscureText: true, // Hide the entered password
+              enabled: !_isPasswordUpdated, // Disable controller if password is updated
+            ),
+            SizedBox(height: 16.0),
+            TextField(
+              controller: _newPasswordController,
               decoration: InputDecoration(
                 labelText: 'Enter new password',
                 labelStyle: TextStyle(color: Colors.white),
@@ -63,12 +137,11 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
               ),
               style: TextStyle(color: Colors.white),
               obscureText: true, // Hide the entered password
+              enabled: !_isPasswordUpdated, // Disable controller if password is updated
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
-                // Add logic to update the password
-              },
+              onPressed: !_isPasswordUpdated ? _updatePassword : null, // Disable button if password is updated
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
@@ -87,6 +160,15 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                 ),
               ),
             ),
+            if (_isPasswordUpdated)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Text(
+                  'Password updated successfully',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.green),
+                ),
+              ),
           ],
         ),
       ),
