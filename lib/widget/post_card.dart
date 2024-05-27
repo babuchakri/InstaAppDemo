@@ -16,18 +16,21 @@ class PostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CachedNetworkImage(
-            imageUrl: snap['postUrl'],
-            placeholder: (context, url) => const Center(
-              child: CircularProgressIndicator(),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8), // Apply same radius to the image
+            child: CachedNetworkImage(
+              imageUrl: snap['postUrl'],
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
           Padding(
-            padding: const EdgeInsets.all(3.0),
+            padding: const EdgeInsets.all(1.0),
             child: Text(
               snap['description'] ?? '',
-              style: const TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
             ),
           ),
         ],

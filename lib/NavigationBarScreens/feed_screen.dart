@@ -79,7 +79,9 @@ class _FeedScreenState extends State<FeedScreen>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NotificationsScreen(),
+                  builder: (context) => NotificationsScreen(
+
+                  ),
                 ),
               );
 
@@ -112,7 +114,7 @@ class _FeedScreenState extends State<FeedScreen>
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
+                        horizontal: 0,
                         vertical: 8,
                       ),
                       child: StreamBuilder(
@@ -131,8 +133,7 @@ class _FeedScreenState extends State<FeedScreen>
                           var random = math.Random();
                           return MasonryGridView.count(
                             crossAxisCount: 2,
-                            mainAxisSpacing: 3,
-                            crossAxisSpacing: 5,
+                            crossAxisSpacing: 2,
                             itemCount: snapshot.data!.docs.length,
                             itemBuilder: (context, index) {
                               var snap = snapshot.data!.docs[index].data();
@@ -140,7 +141,8 @@ class _FeedScreenState extends State<FeedScreen>
 
                               // Generate height factor only once per post
                               if (!postHeightFactors.containsKey(postId)) {
-                                postHeightFactors[postId] = random.nextDouble();
+                                postHeightFactors[postId] =
+                                    random.nextDouble();
                               }
 
                               snap['postHeightFactor'] =
@@ -160,8 +162,7 @@ class _FeedScreenState extends State<FeedScreen>
                                     ),
                                   );
                                 },
-                                child:
-                                PostCard(snap: snap), // Use PostCard here
+                                child: PostCard(snap: snap), // Use PostCard here
                               );
                             },
                           );
@@ -233,8 +234,7 @@ class DetailPage extends StatelessWidget {
               children: [
                 CachedNetworkImage(
                   imageUrl: imageUrl,
-                  placeholder: (context, url) =>
-                  const Center(
+                  placeholder: (context, url) => const Center(
                     child: CircularProgressIndicator(),
                   ),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -271,27 +271,14 @@ class DetailPage extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Container(
-                width: 40,
-                // Adjust width and height according to your preference
-                height: 40,
-                padding: EdgeInsets.all(0),
-                // Adjust padding as needed
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black.withOpacity(
-                      0.5), // Adjust opacity and color as needed
-                ),
-                child: Center(
-                  child: const Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.white,
-                  ),
-                ),
+              child: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
               ),
             ),
           ),
         ],
       ),
     );
-  }}
+  }
+}
