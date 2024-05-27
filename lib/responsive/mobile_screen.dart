@@ -50,7 +50,7 @@ class _MobileScreenState extends State<MobileScreen> {
         controller: pageController,
         onPageChanged: onPageChanged,
         physics: const NeverScrollableScrollPhysics(),
-        children:  [
+        children:  const [
           ConnectScreen(),
           FeedScreen(),
           AddPostScreen(),
@@ -70,7 +70,7 @@ class _MobileScreenState extends State<MobileScreen> {
             backgroundColor: Colors.black, // Set bottom navigation bar background color to black
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Colors.white, // Set selected item color
-            unselectedItemColor: Colors.grey[400], // Set unselected item color
+            unselectedItemColor: Colors.grey[500], // Set unselected item color
             currentIndex: _page,
             onTap: navigationTapped,
             items: const <BottomNavigationBarItem>[

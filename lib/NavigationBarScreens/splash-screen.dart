@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:login_form_one/LoginScreen.dart';
 import 'package:login_form_one/responsive/mobile_screen.dart';
 
 class SplashScreen extends StatefulWidget {

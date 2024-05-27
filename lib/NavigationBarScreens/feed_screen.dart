@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:login_form_one/NavigationBarScreens/notifications_screen.dart';
 import 'profile_screen.dart';
 import '../widget/post_card.dart';
 
@@ -75,6 +76,13 @@ class _FeedScreenState extends State<FeedScreen>
             icon:
             const Icon(Icons.notifications, color: Colors.white, size: 23),
             onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotificationsScreen(),
+                ),
+              );
+
               // Add your notification handling logic here
             },
           ),
@@ -123,8 +131,8 @@ class _FeedScreenState extends State<FeedScreen>
                           var random = math.Random();
                           return MasonryGridView.count(
                             crossAxisCount: 2,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 3,
+                            crossAxisSpacing: 5,
                             itemCount: snapshot.data!.docs.length,
                             itemBuilder: (context, index) {
                               var snap = snapshot.data!.docs[index].data();
@@ -132,8 +140,7 @@ class _FeedScreenState extends State<FeedScreen>
 
                               // Generate height factor only once per post
                               if (!postHeightFactors.containsKey(postId)) {
-                                postHeightFactors[postId] =
-                                    random.nextDouble();
+                                postHeightFactors[postId] = random.nextDouble();
                               }
 
                               snap['postHeightFactor'] =
@@ -153,7 +160,8 @@ class _FeedScreenState extends State<FeedScreen>
                                     ),
                                   );
                                 },
-                                child: PostCard(snap: snap), // Use PostCard here
+                                child:
+                                PostCard(snap: snap), // Use PostCard here
                               );
                             },
                           );
@@ -225,7 +233,8 @@ class DetailPage extends StatelessWidget {
               children: [
                 CachedNetworkImage(
                   imageUrl: imageUrl,
-                  placeholder: (context, url) => const Center(
+                  placeholder: (context, url) =>
+                  const Center(
                     child: CircularProgressIndicator(),
                   ),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -262,14 +271,27 @@ class DetailPage extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: const Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
+              child: Container(
+                width: 40,
+                // Adjust width and height according to your preference
+                height: 40,
+                padding: EdgeInsets.all(0),
+                // Adjust padding as needed
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(
+                      0.5), // Adjust opacity and color as needed
+                ),
+                child: Center(
+                  child: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
         ],
       ),
     );
-  }
-}
+  }}

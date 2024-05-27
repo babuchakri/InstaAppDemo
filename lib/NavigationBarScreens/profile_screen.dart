@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
+import 'feed_screen.dart';
+
 class ProfileScreen extends StatefulWidget {
   final String uid;
   final String currentUserId;
@@ -129,12 +131,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             const SizedBox(height: 30),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Column(
                   children: [
-                    const Text(
+                    Text(
                       '350',
                       style: TextStyle(
                         fontSize: 13,
@@ -142,8 +144,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    const Text(
+                    SizedBox(height: 5),
+                    Text(
                       'Connected',
                       style: TextStyle(
                         fontSize: 14,
@@ -154,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 Column(
                   children: [
-                    const Text(
+                    Text(
                       '10',
                       style: TextStyle(
                         fontSize: 13,
@@ -162,8 +164,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    const Text(
+                    SizedBox(height: 5),
+                    Text(
                       'Hearts',
                       style: TextStyle(
                         fontSize: 14,
@@ -174,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 Column(
                   children: [
-                    const Text(
+                    Text(
                       '240',
                       style: TextStyle(
                         fontSize: 13,
@@ -182,8 +184,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    const Text(
+                    SizedBox(height: 5),
+                    Text(
                       'Likes',
                       style: TextStyle(
                         fontSize: 14,
@@ -215,14 +217,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   runSpacing: 5,
                   children: [
                     for (var doc in snapshot.data!.docs)
-                      Container(
-                        width: (MediaQuery.of(context).size.width - 50) / 3,
-                        height: (MediaQuery.of(context).size.width - 50) / 3,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          image: DecorationImage(
-                            image: NetworkImage(doc['postUrl']),
-                            fit: BoxFit.cover,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailPage(
+                                imageUrl: doc['postUrl'],
+                                username: doc['username'],
+                                profImage: doc['profImage'],
+                                description: doc['description'],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: (MediaQuery.of(context).size.width - 50) / 3,
+                          height: (MediaQuery.of(context).size.width - 50) / 3,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            image: DecorationImage(
+                              image: NetworkImage(doc['postUrl']),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
@@ -230,6 +247,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
             ),
+
           ],
         ),
       ),
