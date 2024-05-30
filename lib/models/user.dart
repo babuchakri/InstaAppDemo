@@ -12,6 +12,10 @@ class User {
   final String photoUrl;
   final double latitude;
   final double longitude;
+  int likes; // Add this field
+  int hearts; // Add this field
+  int connected;
+
 
   User({
     required this.uid,
@@ -24,6 +28,9 @@ class User {
     required this.photoUrl,
     required this.latitude,
     required this.longitude,
+    required this.likes, // Initialize likes count
+    required this.hearts, // Initialize hearts count
+    required this.connected
   });
 
   factory User.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -40,6 +47,9 @@ class User {
       photoUrl: data['photoUrl'],
       latitude: data['latitude'] ?? 0.0, // Default value in case not provided
       longitude: data['longitude'] ?? 0.0, // Default value in case not provided
+      likes: data['likes'] ?? 0, // Default value in case not provided
+      hearts: data['hearts'] ?? 0, // Default value in case not provided
+      connected: data['connected'] ?? 0,
     );
   }
 
@@ -54,6 +64,9 @@ class User {
       'photoUrl': photoUrl,
       'latitude': latitude,
       'longitude': longitude,
+      'likes': likes, // Include likes count in JSON representation
+      'hearts': hearts, // Include hearts count in JSON representation
+      'connected' : connected,
     };
   }
 }

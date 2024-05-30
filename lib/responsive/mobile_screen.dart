@@ -55,7 +55,7 @@ class _MobileScreenState extends State<MobileScreen> {
           FeedScreen(),
           AddPostScreen(),
           FriendsScreen(),
-          ChatScreen(),
+          ChatScreen(currentUserId: '',),
         ],
       ),
       bottomNavigationBar: Column(

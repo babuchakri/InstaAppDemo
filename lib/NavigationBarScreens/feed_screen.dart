@@ -74,14 +74,12 @@ class _FeedScreenState extends State<FeedScreen>
         actions: [
           IconButton(
             icon:
-            const Icon(Icons.notifications, color: Colors.white, size: 23),
+                const Icon(Icons.notifications, color: Colors.white, size: 23),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NotificationsScreen(
-
-                  ),
+                  builder: (context) => NotificationsScreen(),
                 ),
               );
 
@@ -115,7 +113,7 @@ class _FeedScreenState extends State<FeedScreen>
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 0,
-                        vertical: 8,
+                        vertical: 0,
                       ),
                       child: StreamBuilder(
                         stream: FirebaseFirestore.instance
@@ -123,16 +121,15 @@ class _FeedScreenState extends State<FeedScreen>
                             .snapshots(),
                         builder: (context,
                             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                            snapshot) {
+                                snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
+                            return const Center();
                           }
                           var random = math.Random();
                           return MasonryGridView.count(
                             crossAxisCount: 2,
+                            mainAxisSpacing: 2,
                             crossAxisSpacing: 2,
                             itemCount: snapshot.data!.docs.length,
                             itemBuilder: (context, index) {
@@ -141,12 +138,11 @@ class _FeedScreenState extends State<FeedScreen>
 
                               // Generate height factor only once per post
                               if (!postHeightFactors.containsKey(postId)) {
-                                postHeightFactors[postId] =
-                                    random.nextDouble();
+                                postHeightFactors[postId] = random.nextDouble();
                               }
 
                               snap['postHeightFactor'] =
-                              postHeightFactors[postId];
+                                  postHeightFactors[postId];
 
                               return InkWell(
                                 onTap: () {
@@ -162,7 +158,7 @@ class _FeedScreenState extends State<FeedScreen>
                                     ),
                                   );
                                 },
-                                child: PostCard(snap: snap), // Use PostCard here
+                                child: PostCard(snap: snap), //Use PostCard here
                               );
                             },
                           );
@@ -225,13 +221,16 @@ class DetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Set background color to black
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Add top padding to create space
+                SizedBox(height: 40), // Adjust as needed
+
                 CachedNetworkImage(
                   imageUrl: imageUrl,
                   placeholder: (context, url) => const Center(
@@ -240,16 +239,12 @@ class DetailPage extends StatelessWidget {
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(0.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 5.0),
-                      // Adjust left padding here
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: CachedNetworkImageProvider(profImage),
-                      ),
+                    leading: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: CachedNetworkImageProvider(profImage),
                     ),
                     title: Text(
                       username,
@@ -265,7 +260,7 @@ class DetailPage extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 40,
+            top: 60,
             left: 20,
             child: GestureDetector(
               onTap: () {
@@ -274,6 +269,7 @@ class DetailPage extends StatelessWidget {
               child: const Icon(
                 Icons.arrow_back_ios,
                 color: Colors.white,
+                size: 30,
               ),
             ),
           ),

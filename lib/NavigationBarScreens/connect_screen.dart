@@ -8,7 +8,6 @@ import 'dart:math';
 import '../providers/user_provider.dart';
 
 class ConnectScreen extends StatefulWidget {
-
   const ConnectScreen({Key? key}) : super(key: key);
 
   @override
@@ -132,7 +131,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
             doc as DocumentSnapshot<Map<String, dynamic>>,
           );
 
-          Map<String, dynamic>? userData = doc.data() as Map<String, dynamic>?;
+          Map<String, dynamic>? userData =
+          doc.data() as Map<String, dynamic>?;
 
           if (userData != null &&
               userData.containsKey('latitude') &&
@@ -189,17 +189,30 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
   Widget _buildNearbyUsersList() {
     double bottomNavBarHeight = kBottomNavigationBarHeight;
-    double screenHeight = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
 
     return Stack(
       children: _nearbyUsers
           .where((user) =>
-          _isWithinRange(user.latitude, user.longitude, 20))
+          _isWithinRange(user.latitude, user.longitude,
+              20))
           .map((user) {
         double left = _random.nextDouble() *
-            (MediaQuery.of(context).size.width - 80);
+            (MediaQuery
+                .of(context)
+                .size
+                .width - 80);
         double top = _random.nextDouble() *
-            (screenHeight - MediaQuery.of(context).padding.bottom - bottomNavBarHeight - 90); // Adjusted height to avoid bottom navigation bar
+            (screenHeight -
+                MediaQuery
+                    .of(context)
+                    .padding
+                    .bottom -
+                bottomNavBarHeight -
+                90); // Adjusted height to avoid bottom navigation bar
         return Positioned(
           left: left,
           top: top,
@@ -226,6 +239,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
       }).toList(),
     );
   }
+
   bool _isWithinRange(double lat, double long, double range) {
     if (_currentPosition == null) return false;
 
@@ -243,9 +257,27 @@ class _ConnectScreenState extends State<ConnectScreen> {
   }
 
   void _showUserProfileDialog(CustomUser.User user) {
-    bool userAlreadyAdded = Provider.of<UserProvider>(context, listen: false)
+    bool userAlreadyAdded = Provider
+        .of<UserProvider>(context, listen: false)
         .getSelectedUserProfiles
         .any((selectedUser) => selectedUser.uid == user.uid);
+
+    bool liked = false;
+    bool favorited = false;
+    bool connected = false;
+
+    // Check if user.likes and user.hearts are integers or lists
+    // Convert integer values to lists
+    List<int> likesList = [user.likes];
+    List<int> heartsList = [user.hearts];
+
+    liked = likesList.contains(FirebaseAuth.instance.currentUser!.uid);
+    favorited = heartsList.contains(FirebaseAuth.instance.currentUser!.uid);
+
+    // Disable actions if already performed or within 24-hour window
+    bool likeDisabled = liked; // Disable if already liked
+    bool favoriteDisabled = favorited; // Disable if already favorited
+    bool connectDisabled = userAlreadyAdded; // Disable if already connected
 
     showDialog(
       context: context,
@@ -284,16 +316,21 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                 Column(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.people_alt_rounded,
-                                        color: Colors.white,
+                                        color: connected
+                                            ? Colors.green
+                                            : (userAlreadyAdded
+                                            ? Colors.green
+                                            : Colors.white),
                                       ),
-                                      onPressed: userAlreadyAdded
+                                      onPressed: connectDisabled
                                           ? null
                                           : () async {
                                         String currentUserId =
                                             FirebaseAuth.instance
-                                                .currentUser!.uid;
+                                                .currentUser!
+                                                .uid;
                                         DocumentReference friendRef =
                                         FirebaseFirestore.instance
                                             .collection('friends')
@@ -307,12 +344,13 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                             'uid': user.uid,
                                             'email': user.email,
                                           });
-                                          setState(() {});
+                                          setState(() {
+                                            connected = true;
+                                          });
                                           Provider.of<UserProvider>(
-                                              context,
-                                              listen: false)
-                                              .setSelectedUserProfile(
-                                              user);
+                                            context,
+                                            listen: false,
+                                          ).setSelectedUserProfile(user);
                                           Navigator.of(context).pop();
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
@@ -323,6 +361,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                               Duration(seconds: 2),
                                             ),
                                           );
+                                          // Increment connect count when user is added as a friend
+                                          await _incrementConnectCount(
+                                              user);
                                         } catch (e) {
                                           print(
                                               'Error adding friend: $e');
@@ -330,22 +371,19 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                       },
                                     ),
                                     Text(
-                                      userAlreadyAdded
-                                          ? 'connected'
-                                          : 'Connect',
+                                      connected ? 'Connected' : 'Connect',
                                       style: TextStyle(
                                         color: userAlreadyAdded
-                                            ? Colors.grey
+                                            ? Colors.white
                                             : Colors.white,
                                       ),
                                     ),
                                   ],
                                 ),
-
                                 Column(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.person_add_alt_1,
                                         color: Colors.white,
                                       ),
@@ -353,38 +391,56 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                         // Handle request action
                                       },
                                     ),
-                                    const Text('Request',
-                                        style: TextStyle(color: Colors.white)),
+                                    Text(
+                                      'Request',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ],
                                 ),
                                 Column(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.favorite,
-                                        color: Colors.white,
+                                        color: favorited ? Colors.red : Colors.white,
+
                                       ),
-                                      onPressed: () {
-                                        // Handle heart action
+                                      onPressed: favoriteDisabled
+                                          ? null
+                                          : () async {
+                                        await _incrementHeartCount(user);
+                                        setState(() {
+                                          favorited = true;
+                                        });
                                       },
                                     ),
-                                    const Text('Favorite',
-                                        style: TextStyle(color: Colors.white)),
+                                    Text(
+                                      'Favorite',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ],
                                 ),
                                 Column(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.thumb_up,
-                                        color: Colors.white,
+                                        color: liked ? Colors.blue : Colors.white,
+
                                       ),
-                                      onPressed: () {
-                                        // Handle like action
+                                      onPressed: likeDisabled
+                                          ? null
+                                          : () async {
+                                        await _incrementLikeCount(user);
+                                        setState(() {
+                                          liked = true;
+                                        });
                                       },
                                     ),
-                                    const Text('Like',
-                                        style: TextStyle(color: Colors.white)),
+                                    Text(
+                                      'Like',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -401,5 +457,65 @@ class _ConnectScreenState extends State<ConnectScreen> {
         );
       },
     );
+  }
+
+  Future<void> _incrementLikeCount(CustomUser.User user) async {
+    try {
+      DocumentReference userRef =
+      FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(userRef);
+        if (!snapshot.exists) {
+          throw Exception("User does not exist!");
+        }
+
+        int newLikeCount =
+            (snapshot.data() as Map<String, dynamic>)['likes'] + 1;
+        transaction.update(userRef, {'likes': newLikeCount});
+      });
+    } catch (e) {
+      print('Error incrementing like count: $e');
+    }
+  }
+
+  Future<void> _incrementConnectCount(CustomUser.User user) async {
+    try {
+      DocumentReference userRef =
+      FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(userRef);
+        if (!snapshot.exists) {
+          throw Exception("User does not exist!");
+        }
+
+        int newConnectCount =
+            (snapshot.data() as Map<String, dynamic>)['connected'] + 1;
+        transaction.update(userRef, {'connected': newConnectCount});
+      });
+    } catch (e) {
+      print('Error incrementing connect count: $e');
+    }
+  }
+
+  Future<void> _incrementHeartCount(CustomUser.User user) async {
+    try {
+      DocumentReference userRef =
+      FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(userRef);
+        if (!snapshot.exists) {
+          throw Exception("User does not exist!");
+        }
+
+        int newHeartCount =
+            (snapshot.data() as Map<String, dynamic>)['hearts'] + 1;
+        transaction.update(userRef, {'hearts': newHeartCount});
+      });
+    } catch (e) {
+      print('Error incrementing heart count: $e');
+    }
   }
 }

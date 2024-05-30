@@ -7,7 +7,7 @@ class PostCard extends StatelessWidget {
   const PostCard({Key? key, required this.snap}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {              
     return Card(
       color: Colors.black,
       shape: RoundedRectangleBorder(
@@ -17,20 +17,22 @@ class PostCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8), // Apply same radius to the image
+            borderRadius: BorderRadius.circular(5),
+            // Apply same radius to the image
             child: CachedNetworkImage(
               imageUrl: snap['postUrl'],
-              placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              placeholder: (context, url) => const Center(),
               errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(1.0),
+            padding: const EdgeInsets.all(2.0),
             child: Text(
               snap['description'] ?? '',
-              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         ],

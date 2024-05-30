@@ -44,6 +44,7 @@ class AuthMethods {
           name.isNotEmpty &&
           phone.isNotEmpty &&
           bio.isNotEmpty &&
+
           gender.isNotEmpty) {
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
@@ -66,6 +67,9 @@ class AuthMethods {
           photoUrl: photoUrl,
           latitude: position.latitude,
           longitude: position.longitude,
+          likes: 0, // Initialize likes count to zero
+          hearts: 0, // Initialize hearts count to zero
+          connected: 0,
         );
 
         await _firestore.collection('users').doc(cred.user!.uid).set(user.toJson());

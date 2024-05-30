@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
-
 import 'feed_screen.dart';
+import 'individual_chat_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String uid;
   final String currentUserId;
 
-  const ProfileScreen({Key? key, required this.uid, required this.currentUserId}) : super(key: key);
+  const ProfileScreen({Key? key, required this.uid, required this.currentUserId})
+      : super(key: key);
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -80,7 +81,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           else
             IconButton(
               icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => IndividualChatScreen(
+                      currentUserId: widget.currentUserId,
+                      otherUserId: widget.uid,
+                    ),
+                  ),
+                );
+              },
             ),
           IconButton(
             icon: const Icon(Icons.more_vert, color: Colors.white),
@@ -101,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  radius: 40,
+                  radius: 38,
                   backgroundImage: NetworkImage(userData['photoUrl'] ?? ''),
                 ),
                 const SizedBox(width: 20),
@@ -116,87 +127,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 3),
                     Text(
                       userData['bio'] ?? '',
                       textAlign: TextAlign.start,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.normal,
-                        color: Colors.grey[600],
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 30),
-            const Row(
+            const SizedBox(height: 40),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Column(
                   children: [
                     Text(
-                      '350',
-                      style: TextStyle(
+                      userData['connected'].toString(),
+                      style: const TextStyle(
                         fontSize: 13,
                         color: Colors.green,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 5),
-                    Text(
+                    const SizedBox(height: 5),
+                    const Text(
                       'Connected',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
                 Column(
                   children: [
                     Text(
-                      '10',
-                      style: TextStyle(
+                      userData['hearts'].toString(),
+                      style: const TextStyle(
                         fontSize: 13,
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 5),
-                    Text(
+                    const SizedBox(height: 5),
+                    const Text(
                       'Hearts',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
                 Column(
                   children: [
                     Text(
-                      '240',
-                      style: TextStyle(
+                      userData['likes'].toString(),
+                      style: const TextStyle(
                         fontSize: 13,
                         color: Colors.blue,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 5),
-                    Text(
+                    const SizedBox(height: 5),
+                    const Text(
                       'Likes',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 60),
+            const SizedBox(height: 40),
             const Text(
               'Recent Posts',
               style: TextStyle(
@@ -207,10 +218,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 10),
             FutureBuilder(
-              future: FirebaseFirestore.instance.collection('posts').where('uid', isEqualTo: widget.uid).get(),
+              future: FirebaseFirestore.instance
+                  .collection('posts')
+                  .where('uid', isEqualTo: widget.uid)
+                  .get(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(
+                      child: CircularProgressIndicator());
                 }
                 return Wrap(
                   spacing: 5,
@@ -232,8 +248,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         },
                         child: Container(
-                          width: (MediaQuery.of(context).size.width - 50) / 3,
-                          height: (MediaQuery.of(context).size.width - 50) / 3,
+                          width: (MediaQuery.of(context).size.width -
+                              50) /
+                              3,
+                          height: (MediaQuery.of(context).size.width -
+                              50) /
+                              3,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(5),
                             image: DecorationImage(
@@ -247,7 +267,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
             ),
-
           ],
         ),
       ),
