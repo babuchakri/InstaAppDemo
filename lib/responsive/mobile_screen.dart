@@ -50,7 +50,7 @@ class _MobileScreenState extends State<MobileScreen> {
         controller: pageController,
         onPageChanged: onPageChanged,
         physics: const NeverScrollableScrollPhysics(),
-        children:  const [
+        children: const [
           ConnectScreen(),
           FeedScreen(),
           AddPostScreen(),
@@ -63,40 +63,51 @@ class _MobileScreenState extends State<MobileScreen> {
         children: [
           // Thick line above the bottom navigation bar
           Container(
-            height: 0.20, // Adjust the height of the line as needed
+            height: 0.0, // Adjust the height of the line as needed
             color: Colors.grey,
           ),
-          BottomNavigationBar(
-            backgroundColor: Colors.black, // Set bottom navigation bar background color to black
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: Colors.white, // Set selected item color
-            unselectedItemColor: Colors.grey[500], // Set unselected item color
-            currentIndex: _page,
-            onTap: navigationTapped,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.location_history, size: 26),
-                label: 'connect',
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.black, // Set bottom navigation bar background color to black
+              border: Border(
+                top: BorderSide(
+                  color: Colors.grey.shade900, // Add border color
+                  width: 1, // Add border width
+                ),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.explore, size: 26),
-                label: 'explore',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.add_circle, size: 26),
-                label: 'upload',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.group, size: 26),
-                label: 'friends',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble, size: 26),
-                label: 'chat',
-              ),
-            ],
-            selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white), // Adjust the selected label font size and weight
-            unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.normal), // Adjust the unselected label font size and weight
+            ),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.black, // Set background color to black
+              selectedItemColor: Colors.white, // Set selected item color
+              unselectedItemColor: Colors.grey[500], // Set unselected item color
+              currentIndex: _page,
+              onTap: navigationTapped,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.location_history, size: 26),
+                  label: 'connect',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.explore, size: 26),
+                  label: 'explore',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.add_circle, size: 26),
+                  label: 'upload',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.group, size: 26),
+                  label: 'friends',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.chat_bubble, size: 26),
+                  label: 'chat',
+                ),
+              ],
+              selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white), // Adjust the selected label font size and weight
+              unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold), // Adjust the unselected label font size and weight
+            ),
           ),
         ],
       ),

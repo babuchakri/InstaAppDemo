@@ -189,28 +189,18 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
   Widget _buildNearbyUsersList() {
     double bottomNavBarHeight = kBottomNavigationBarHeight;
-    double screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return Stack(
       children: _nearbyUsers
           .where((user) =>
-          _isWithinRange(user.latitude, user.longitude,
-              20))
+          _isWithinRange(user.latitude, user.longitude, 20))
           .map((user) {
         double left = _random.nextDouble() *
-            (MediaQuery
-                .of(context)
-                .size
-                .width - 80);
+            (MediaQuery.of(context).size.width - 80);
         double top = _random.nextDouble() *
             (screenHeight -
-                MediaQuery
-                    .of(context)
-                    .padding
-                    .bottom -
+                MediaQuery.of(context).padding.bottom -
                 bottomNavBarHeight -
                 90); // Adjusted height to avoid bottom navigation bar
         return Positioned(
@@ -256,11 +246,21 @@ class _ConnectScreenState extends State<ConnectScreen> {
     return distanceInMeters <= range;
   }
 
-  void _showUserProfileDialog(CustomUser.User user) {
-    bool userAlreadyAdded = Provider
-        .of<UserProvider>(context, listen: false)
-        .getSelectedUserProfiles
-        .any((selectedUser) => selectedUser.uid == user.uid);
+  void _showUserProfileDialog(CustomUser.User user) async {
+    String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    bool userAlreadyAdded = false;
+
+    // Check if the user is already added to the friends list
+    DocumentSnapshot friendSnapshot = await FirebaseFirestore.instance
+        .collection('friends')
+        .doc(currentUserId)
+        .collection('user_friends')
+        .doc(user.uid)
+        .get();
+
+    if (friendSnapshot.exists) {
+      userAlreadyAdded = true;
+    }
 
     bool liked = false;
     bool favorited = false;
@@ -371,11 +371,11 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                       },
                                     ),
                                     Text(
-                                      connected ? 'Connected' : 'Connect',
+                                      userAlreadyAdded
+                                          ? 'Connected'
+                                          : 'Connect',
                                       style: TextStyle(
-                                        color: userAlreadyAdded
-                                            ? Colors.white
-                                            : Colors.white,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ],
@@ -402,8 +402,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                     IconButton(
                                       icon: Icon(
                                         Icons.favorite,
-                                        color: favorited ? Colors.red : Colors.white,
-
+                                        color:
+                                        favorited ? Colors.red : Colors.white,
                                       ),
                                       onPressed: favoriteDisabled
                                           ? null
@@ -426,7 +426,6 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                       icon: Icon(
                                         Icons.thumb_up,
                                         color: liked ? Colors.blue : Colors.white,
-
                                       ),
                                       onPressed: likeDisabled
                                           ? null

@@ -29,6 +29,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +44,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(bottom: 20.0), // Add padding at the bottom to move the search bar down
+                padding: const EdgeInsets.only(bottom: 20.0),
                 child: Container(
                   height: 35,
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -80,7 +82,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +100,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       child: UserProfile(
                         user: currentUser,
                         isCurrentUser: true,
-                      ), // Pass true for the current user
+                      ),
                     ),
                     const SizedBox(height: 15),
                   ],
@@ -111,9 +112,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
             // Display selected user profiles
             Consumer<UserProvider>(
               builder: (context, userProvider, child) {
-                List<User>? selectedUsers =
-                    userProvider.getSelectedUserProfiles;
-                if (selectedUsers != null && selectedUsers.isNotEmpty) {
+                // Retrieve friends' data from the provider
+                List<User>? selectedUsers = userProvider.friends;
+                if (selectedUsers.isNotEmpty) {
                   // Filter selected users based on search query
                   List<User> filteredUsers = selectedUsers
                       .where((user) => user.username
@@ -123,7 +124,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
                   return _buildUserRows(filteredUsers);
                 } else {
-                  return const SizedBox.shrink();
+                  // Handle case where no friends data is available
+                  return Center(
+                    child: Text(
+                      'No friends available',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
                 }
               },
             ),
@@ -147,7 +154,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 MaterialPageRoute(
                   builder: (context) => ProfileScreen(
                     uid: users[i].uid,
-                    currentUserId: '',
+                    currentUserId: '', // Ensure this is populated correctly
                   ),
                 ),
               );
@@ -196,12 +203,22 @@ class UserProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CircleAvatar(
-          backgroundImage: NetworkImage(user.photoUrl),
-          radius: 30,
-          backgroundColor: isCurrentUser
-              ? Colors.grey
-              : Colors.transparent, // Example: Set background color for the current user
+        Container(
+          width: 60, // Adjust the size as needed
+          height: 60, // Adjust the size as needed
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey, // Placeholder color
+          ),
+          child: user.photoUrl.isNotEmpty
+              ? CircleAvatar(
+            backgroundImage: NetworkImage(user.photoUrl),
+          )
+              : Icon(
+            Icons.account_circle,
+            size: 60, // Adjust the size as needed
+            color: isCurrentUser ? Colors.green : Colors.white,
+          ),
         ),
         const SizedBox(height: 5),
         Text(

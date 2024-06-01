@@ -34,8 +34,8 @@ class _FeedScreenState extends State<FeedScreen>
   }
 
   Future<void> _refreshPosts() async {
-    // Implement logic to refresh posts
-    // For example, you can fetch new posts from the database
+    // Implement logic to refresh posts if necessary
+    // Firestore snapshots stream will handle real-time updates
   }
 
   @override
@@ -74,7 +74,7 @@ class _FeedScreenState extends State<FeedScreen>
         actions: [
           IconButton(
             icon:
-                const Icon(Icons.notifications, color: Colors.white, size: 23),
+            const Icon(Icons.notifications, color: Colors.white, size: 23),
             onPressed: () {
               Navigator.push(
                 context,
@@ -118,19 +118,22 @@ class _FeedScreenState extends State<FeedScreen>
                       child: StreamBuilder(
                         stream: FirebaseFirestore.instance
                             .collection('posts')
+                            .orderBy('datePublished', descending: true) // Order by datePublished in descending order
                             .snapshots(),
                         builder: (context,
                             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                                snapshot) {
+                            snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const Center();
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
                           }
                           var random = math.Random();
                           return MasonryGridView.count(
                             crossAxisCount: 2,
-                            mainAxisSpacing: 2,
-                            crossAxisSpacing: 2,
+                            mainAxisSpacing: 0,
+                            crossAxisSpacing: 0,
                             itemCount: snapshot.data!.docs.length,
                             itemBuilder: (context, index) {
                               var snap = snapshot.data!.docs[index].data();
@@ -142,7 +145,7 @@ class _FeedScreenState extends State<FeedScreen>
                               }
 
                               snap['postHeightFactor'] =
-                                  postHeightFactors[postId];
+                              postHeightFactors[postId];
 
                               return InkWell(
                                 onTap: () {

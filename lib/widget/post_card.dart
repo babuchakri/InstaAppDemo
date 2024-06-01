@@ -17,7 +17,7 @@ class PostCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(4),
             // Apply same radius to the image
             child: CachedNetworkImage(
               imageUrl: snap['postUrl'],
@@ -26,7 +26,7 @@ class PostCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(2.0),
+            padding: const EdgeInsets.all(0.0),
             child: Text(
               snap['description'] ?? '',
               style: const TextStyle(

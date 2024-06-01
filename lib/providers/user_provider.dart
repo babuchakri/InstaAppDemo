@@ -1,3 +1,5 @@
+// user_provider.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/user.dart';
@@ -45,15 +47,18 @@ class UserProvider with ChangeNotifier {
 
     try {
       _friends.clear();
-      QuerySnapshot<Map<String, dynamic>> friendsSnapshot = await FirebaseFirestore.instance
+      QuerySnapshot<Map<String, dynamic>> friendsSnapshot =
+      await FirebaseFirestore.instance
           .collection('friends')
           .doc(currentUserId)
           .collection('user_friends')
           .get();
 
-      _friends = friendsSnapshot.docs
-          .map((doc) => User.fromSnapshot(doc))
-          .toList();
+      if (friendsSnapshot.docs.isNotEmpty) {
+        _friends = friendsSnapshot.docs.map((doc) => User.fromSnapshot(doc)).toList();
+      } else {
+        print('No friends found for the user.');
+      }
 
       notifyListeners();
     } catch (error) {
