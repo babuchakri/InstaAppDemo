@@ -19,12 +19,14 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
   File? _selectedImage;
   bool _isPhotoUpdated = false;
   bool _isLoading = false;
+  String? _errorMessage;
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
+        _isPhotoUpdated = false; // Reset photo updated status if a new image is picked
       });
     }
   }
@@ -36,6 +38,7 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
       String fileName = basename(_selectedImage!.path);
       setState(() {
         _isLoading = true;
+        _errorMessage = null; // Clear any previous error message
       });
       try {
         // Upload image to Firebase Storage
@@ -53,18 +56,16 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
           _isPhotoUpdated = true;
           _isLoading = false;
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profile photo updated successfully')),
-        );
       } catch (e) {
         setState(() {
           _isLoading = false;
+          _errorMessage = 'Failed to update profile photo: $e';
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update profile photo: $e')),
-        );
       }
+    } else {
+      setState(() {
+        _errorMessage = 'Please select an image to upload';
+      });
     }
   }
 
@@ -95,7 +96,7 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
               ),
               child: Center(
                 child: Text(
-                  'The updated profile photo will be visible in the profile page',
+                  'The updated profile photo will be visible on the profile page',
                   style: TextStyle(
                     fontSize: 16.0,
                     color: Colors.white,
@@ -145,7 +146,7 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 5.0),
                     child: Text(
-                      'Update Profile Photo',
+                      'Update',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 23.0,
@@ -168,6 +169,18 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
                   style: TextStyle(
                     fontSize: 16.0,
                     color: Colors.green,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.red,
                   ),
                   textAlign: TextAlign.center,
                 ),

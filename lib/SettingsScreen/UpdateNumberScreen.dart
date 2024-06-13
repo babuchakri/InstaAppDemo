@@ -11,11 +11,12 @@ class UpdateNumberScreen extends StatefulWidget {
 }
 
 class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
-  final TextEditingController numberController = TextEditingController();
+  final TextEditingController _numberController = TextEditingController();
   bool _isNumberUpdated = false;
+  String? _errorMessage;
 
   void _updateNumber() async {
-    String newNumber = numberController.text.trim();
+    String newNumber = _numberController.text.trim();
     User? currentUser = FirebaseAuth.instance.currentUser;
 
     if (newNumber.isNotEmpty && currentUser != null) {
@@ -27,21 +28,18 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
 
         setState(() {
           _isNumberUpdated = true;
+          _errorMessage = null;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Number updated successfully')),
-        );
-
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update number: $e')),
-        );
+        setState(() {
+          _errorMessage = 'Failed to update number: $e';
+        });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid number')),
-      );
+      setState(() {
+        _errorMessage = 'Please enter a valid number';
+      });
     }
   }
 
@@ -89,7 +87,7 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
             ),
             SizedBox(height: 16.0),
             TextField(
-              controller: numberController,
+              controller: _numberController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Enter new number',
@@ -100,6 +98,18 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
               ),
               style: TextStyle(color: Colors.white),
             ),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.red,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _updateNumber,

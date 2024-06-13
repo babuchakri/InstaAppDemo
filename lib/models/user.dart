@@ -8,7 +8,11 @@ class User {
   final String phone;
   final String bio;
   final String gender;
-  final String photoUrl;
+  String? snapchatId; // Add this property
+  String? instagramId; // Add this property
+  String? facebookId; // Add this property
+
+  late final String photoUrl;
   final double latitude;
   final double longitude;
   int likes; // Add this field
@@ -18,6 +22,10 @@ class User {
   User({
     required this.uid,
     required this.username,
+    this.snapchatId, // Initialize it in the constructor
+    this.instagramId, // Initialize it in the constructor
+    this.facebookId, // Initialize it in the constructor
+
     required this.email,
     required this.password,
     required this.phone,
@@ -38,15 +46,28 @@ class User {
       uid: snapshot.id,
       username: data['username'] ?? '',
       email: data['email'] ?? '',
-      password: data['password'] ?? '', // Not recommended to store passwords in plaintext
+      password: data['password'] ?? '',
+      // Not recommended to store passwords in plaintext
       phone: data['phone'] ?? '',
       bio: data['bio'] ?? '',
+      snapchatId: data['snapchatId'],
+      // Initialize the snapchatId property
+      instagramId: data['instagramId'],
+      // Initialize the snapchatId property
+      facebookId: data['facebookId'],
+      // Initialize the snapchatId property
+
       gender: data['gender'] ?? '',
-      photoUrl: data['photoUrl'] ?? '', // Provide a default value for photoUrl
-      latitude: (data['latitude'] ?? 0.0).toDouble(), // Default value in case not provided
-      longitude: (data['longitude'] ?? 0.0).toDouble(), // Default value in case not provided
-      likes: data['likes'] ?? 0, // Default value in case not provided
-      hearts: data['hearts'] ?? 0, // Default value in case not provided
+      photoUrl: data['photoUrl'] ?? '',
+      // Provide a default value for photoUrl
+      latitude: (data['latitude'] ?? 0.0).toDouble(),
+      // Default value in case not provided
+      longitude: (data['longitude'] ?? 0.0).toDouble(),
+      // Default value in case not provided
+      likes: data['likes'] ?? 0,
+      // Default value in case not provided
+      hearts: data['hearts'] ?? 0,
+      // Default value in case not provided
       connected: data['connected'] ?? 0,
     );
   }
@@ -61,10 +82,14 @@ class User {
       'gender': gender,
       'photoUrl': photoUrl,
       'latitude': latitude,
+      'snapchatId': snapchatId,
+      'instagramId': instagramId,
+      'facebookId': facebookId,
+
       'longitude': longitude,
       'likes': likes, // Include likes count in JSON representation
       'hearts': hearts, // Include hearts count in JSON representation
-      'connected' : connected,
+      'connected': connected,
     };
   }
 }

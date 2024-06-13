@@ -1,5 +1,3 @@
-// user_provider.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/user.dart';
@@ -63,6 +61,16 @@ class UserProvider with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       print('Error fetching friends: $error');
+    }
+  }
+
+  Future<void> updateProfilePhoto(String downloadUrl) async {
+    if (_user != null) {
+      _user!.photoUrl = downloadUrl;
+      // Update user document in Firestore here if necessary
+
+      // Notify listeners of the change
+      notifyListeners();
     }
   }
 }

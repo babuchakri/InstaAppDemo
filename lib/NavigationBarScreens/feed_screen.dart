@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:math' as math;
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:login_form_one/NavigationBarScreens/notifications_screen.dart';
-import 'profile_screen.dart';
+import 'package:shimmer/shimmer.dart';
 import '../widget/post_card.dart';
+import 'profile_screen.dart';
+import 'notifications_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({Key? key}) : super(key: key);
@@ -15,66 +13,111 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
-class _FeedScreenState extends State<FeedScreen>
-    with SingleTickerProviderStateMixin {
-  final Map<String, double> postHeightFactors = {};
-  late TabController _tabController;
+class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMixin {
+  final List<DocumentSnapshot<Map<String, dynamic>>> _cachedPosts = [];
+  bool _isLoadingMore = false;
+  late ScrollController _scrollController;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    _tabController =
-        TabController(length: 1, vsync: this); // Only one tab in this case
+    _scrollController = ScrollController();
+    _scrollController.addListener(_scrollListener);
+    _loadInitialPosts();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
+  Future<void> _loadInitialPosts() async {
+    _loadPosts(isRefresh: true);
+  }
+
+  Future<void> _loadPosts({bool isRefresh = false}) async {
+    if (_isLoadingMore) return;
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+        .collection('posts')
+        .orderBy('datePublished', descending: true)
+        .limit(10);
+
+    if (!isRefresh && _cachedPosts.isNotEmpty) {
+      query = query.startAfterDocument(_cachedPosts.last);
+    }
+
+    QuerySnapshot<Map<String, dynamic>> snapshot = await query.get();
+
+    setState(() {
+      if (isRefresh) {
+        _cachedPosts.clear();
+      }
+      _cachedPosts.addAll(snapshot.docs);
+      _isLoadingMore = false;
+    });
+  }
+
   Future<void> _refreshPosts() async {
-    // Implement logic to refresh posts if necessary
-    // Firestore snapshots stream will handle real-time updates
+    await _loadPosts(isRefresh: true);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (!_isLoadingMore) {
+        _loadPosts();
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.account_circle_outlined,
-            color: Colors.white,
-            size: 23,
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProfileScreen(
-                  uid: FirebaseAuth.instance.currentUser!.uid,
-                  currentUserId: FirebaseAuth.instance.currentUser!.uid,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: IconButton(
+            icon: const Icon(
+              Icons.account_circle_outlined,
+              color: Colors.white,
+              size: 23,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileScreen(
+                    uid: FirebaseAuth.instance.currentUser!.uid,
+                    currentUserId: FirebaseAuth.instance.currentUser!.uid,
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
         title: const Text(
           "connect",
           style: TextStyle(
             color: Colors.white,
-            fontSize: 21,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
+            fontFamily: 'RobotoMono',
           ),
         ),
         actions: [
           IconButton(
-            icon:
-            const Icon(Icons.notifications, color: Colors.white, size: 23),
+            icon: const Icon(Icons.notifications, color: Colors.white, size: 23),
             onPressed: () {
               Navigator.push(
                 context,
@@ -82,8 +125,6 @@ class _FeedScreenState extends State<FeedScreen>
                   builder: (context) => NotificationsScreen(),
                 ),
               );
-
-              // Add your notification handling logic here
             },
           ),
           const ToggleButton(),
@@ -91,90 +132,52 @@ class _FeedScreenState extends State<FeedScreen>
       ),
       body: RefreshIndicator(
         onRefresh: _refreshPosts,
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            ),
-          ),
-          child: Column(
-            children: [
-              const Divider(
-                color: Colors.black,
-                height: 3,
-                thickness: 5,
-              ),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 0,
-                        vertical: 0,
-                      ),
-                      child: StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection('posts')
-                            .orderBy('datePublished', descending: true) // Order by datePublished in descending order
-                            .snapshots(),
-                        builder: (context,
-                            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                            snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          var random = math.Random();
-                          return MasonryGridView.count(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 0,
-                            crossAxisSpacing: 0,
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (context, index) {
-                              var snap = snapshot.data!.docs[index].data();
-                              String postId = snapshot.data!.docs[index].id;
-
-                              // Generate height factor only once per post
-                              if (!postHeightFactors.containsKey(postId)) {
-                                postHeightFactors[postId] = random.nextDouble();
-                              }
-
-                              snap['postHeightFactor'] =
-                              postHeightFactors[postId];
-
-                              return InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DetailPage(
-                                        imageUrl: snap['postUrl'],
-                                        username: snap['username'],
-                                        profImage: snap['profImage'],
-                                        description: snap['description'],
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: PostCard(snap: snap), //Use PostCard here
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        child: _cachedPosts.isEmpty
+            ? _buildShimmerList()
+            : ListView.builder(
+          controller: _scrollController,
+          itemCount: _cachedPosts.length,
+          itemBuilder: (context, index) {
+            var snap = _cachedPosts[index].data()!;
+            return Column(
+              children: [
+                PostCard(snap: snap),
+                if (index < _cachedPosts.length - 1)
+                  Divider(color: Colors.grey.shade900),
+              ],
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return ListView.builder(
+      itemCount: 10,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[800]!,
+          highlightColor: Colors.grey[700]!,
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(8.0),
+            leading: CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.grey[800],
+            ),
+            title: Container(
+              width: double.infinity,
+              height: 20,
+              color: Colors.grey[800],
+            ),
+            subtitle: Container(
+              width: double.infinity,
+              height: 20,
+              color: Colors.grey[800],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -195,89 +198,13 @@ class _ToggleButtonState extends State<ToggleButton> {
       icon: Icon(
         _isSwitched ? Icons.toggle_on : Icons.toggle_off,
         color: _isSwitched ? Colors.green : Colors.red,
-        size: 43,
+        size: 44,
       ),
       onPressed: () {
         setState(() {
           _isSwitched = !_isSwitched;
         });
-        // Add your toggle button handling logic here
       },
-    );
-  }
-}
-
-class DetailPage extends StatelessWidget {
-  final String imageUrl;
-  final String username;
-  final String profImage;
-  final String description;
-
-  const DetailPage({
-    Key? key,
-    required this.imageUrl,
-    required this.username,
-    required this.profImage,
-    required this.description,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Add top padding to create space
-                SizedBox(height: 40), // Adjust as needed
-
-                CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      radius: 20,
-                      backgroundImage: CachedNetworkImageProvider(profImage),
-                    ),
-                    title: Text(
-                      username,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    subtitle: Text(
-                      description,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 60,
-            left: 20,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
-                size: 30,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

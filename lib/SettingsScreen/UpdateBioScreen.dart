@@ -11,11 +11,12 @@ class UpdateBioScreen extends StatefulWidget {
 }
 
 class _UpdateBioScreenState extends State<UpdateBioScreen> {
-  final TextEditingController bioController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
   bool _isBioUpdated = false;
+  String? _errorMessage;
 
   void _updateBio() async {
-    String newBio = bioController.text.trim();
+    String newBio = _bioController.text.trim();
     User? currentUser = FirebaseAuth.instance.currentUser;
 
     if (newBio.isNotEmpty && currentUser != null) {
@@ -27,21 +28,18 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
 
         setState(() {
           _isBioUpdated = true;
+          _errorMessage = null;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Bio updated successfully')),
-        );
-
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update bio: $e')),
-        );
+        setState(() {
+          _errorMessage = 'Failed to update bio: $e';
+        });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid bio')),
-      );
+      setState(() {
+        _errorMessage = 'Please enter a valid bio';
+      });
     }
   }
 
@@ -89,7 +87,7 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
             ),
             SizedBox(height: 16.0),
             TextFormField(
-              controller: bioController,
+              controller: _bioController,
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'Type your bio here...',
@@ -100,6 +98,18 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
               ),
               style: TextStyle(color: Colors.white),
             ),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.red,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _updateBio,

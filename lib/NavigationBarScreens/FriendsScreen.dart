@@ -22,10 +22,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
     final currentUser = userProvider.getUser;
     if (currentUser != null) {
       final currentUserId = currentUser.uid;
-      print('Current user ID: $currentUserId');
       userProvider.fetchFriends(currentUserId);
     } else {
-      print('Current user is null');
     }
   }
 
@@ -213,12 +211,12 @@ class UserProfile extends StatelessWidget {
           child: user.photoUrl.isNotEmpty
               ? CircleAvatar(
             backgroundImage: NetworkImage(user.photoUrl),
+            radius: 30,
+            backgroundColor: isCurrentUser
+                ? Colors.grey
+                : Colors.transparent, // Example: Set background color for the current user
           )
-              : Icon(
-            Icons.account_circle,
-            size: 60, // Adjust the size as needed
-            color: isCurrentUser ? Colors.green : Colors.white,
-          ),
+              : SizedBox(), // Empty SizedBox when photoUrl is empty
         ),
         const SizedBox(height: 5),
         Text(

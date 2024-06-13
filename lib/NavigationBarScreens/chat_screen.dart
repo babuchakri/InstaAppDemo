@@ -33,6 +33,9 @@ class _ChatScreenState extends State<ChatScreen> {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
+        actions: [
+
+        ],
       ),
       body: Column(
         children: [

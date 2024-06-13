@@ -8,6 +8,8 @@
 
 
 
+
+
     <application
         android:label="login_form_one"
         android:name="${applicationName}"

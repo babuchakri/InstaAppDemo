@@ -13,6 +13,7 @@ class UpdateNameScreen extends StatefulWidget {
 class _UpdateNameScreenState extends State<UpdateNameScreen> {
   final TextEditingController _nameController = TextEditingController();
   bool _isNameUpdated = false;
+  bool _showErrorMessage = false; // Added to track whether to show the error message
 
   void _updateName() async {
     String newName = _nameController.text.trim();
@@ -27,21 +28,23 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
 
         setState(() {
           _isNameUpdated = true;
+          _showErrorMessage = false; // Reset error message flag
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Name updated successfully')),
+          SnackBar(content: Text('Name updated successfully', style: TextStyle(color: Colors.green))),
         );
 
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update name: $e')),
+          SnackBar(content: Text('Failed to update name: $e', style: TextStyle(color: Colors.red))),
         );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid name')),
-      );
+      // Show error message if name is empty
+      setState(() {
+        _showErrorMessage = true;
+      });
     }
   }
 
@@ -120,6 +123,18 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
                 ),
               ),
             ),
+            if (_showErrorMessage)
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Text(
+                  'Please enter a valid name',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.red,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             if (_isNameUpdated)
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),

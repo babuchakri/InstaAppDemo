@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:login_form_one/forgot_password_screen.dart';
 import 'package:login_form_one/resources/auth_models.dart';
 import 'package:login_form_one/responsive/mobile_screen.dart';
 import 'RegistrationScreen.dart';
@@ -119,7 +120,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ForgotPasswordScreen(
+
+                              ),
+                            ),
+                          );
+                        },
                         child: const Text(
                           'Forgot Password?',
                           style: TextStyle(fontSize: 17),

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:login_form_one/NavigationBarScreens/add_post_screen.dart';
 import 'package:login_form_one/NavigationBarScreens/chat_screen.dart';
 import 'package:login_form_one/NavigationBarScreens/connect_screen.dart';
@@ -14,7 +17,9 @@ class MobileScreen extends StatefulWidget {
 
 class _MobileScreenState extends State<MobileScreen> {
   int _page = 0;
-  late PageController pageController; // for tabs animation
+  late PageController pageController;
+  late StreamSubscription<Position>? positionStreamSubscription; // Nullable subscription
+  bool isLocationServiceEnabled = false;
 
   @override
   void initState() {
@@ -24,28 +29,70 @@ class _MobileScreenState extends State<MobileScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     pageController.dispose();
+    stopLocationService(); // Ensure to stop location updates when disposing the screen
+    super.dispose();
   }
 
   void onPageChanged(int page) {
     setState(() {
       _page = page;
     });
+    if (page == 0) {
+      activateLocationService();
+    } else {
+      stopLocationService();
+    }
   }
 
   void navigationTapped(int page) {
-    // Animating Page
     pageController.jumpToPage(page);
     setState(() {
       _page = page;
     });
+    if (page == 0) {
+      activateLocationService();
+    } else {
+      stopLocationService();
+    }
+  }
+
+  void activateLocationService() {
+    if (!isLocationServiceEnabled) {
+      Geolocator.requestPermission().then((locationPermission) {
+        if (locationPermission == LocationPermission.denied) {
+          print('Location permission denied.');
+        } else if (locationPermission == LocationPermission.deniedForever) {
+          print('Location permission permanently denied.');
+        } else {
+          positionStreamSubscription = Geolocator.getPositionStream().listen((Position position) {
+            setState(() {
+              // Handle location updates here
+            });
+          });
+          setState(() {
+            isLocationServiceEnabled = true;
+          });
+          print('Location service activated.');
+        }
+      });
+    }
+  }
+
+  void stopLocationService() {
+    if (isLocationServiceEnabled) {
+      positionStreamSubscription?.cancel(); // Cancel the subscription to stop listening to location updates
+      setState(() {
+        isLocationServiceEnabled = false;
+      });
+      print('Location service stopped.');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Set background color to black
+      backgroundColor: Colors.black,
       body: PageView(
         controller: pageController,
         onPageChanged: onPageChanged,
@@ -55,58 +102,57 @@ class _MobileScreenState extends State<MobileScreen> {
           FeedScreen(),
           AddPostScreen(),
           FriendsScreen(),
-          ChatScreen(currentUserId: '',),
+          ChatScreen(currentUserId: ''),
         ],
       ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Thick line above the bottom navigation bar
           Container(
-            height: 0.0, // Adjust the height of the line as needed
+            height: 0.0,
             color: Colors.grey,
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.black, // Set bottom navigation bar background color to black
+              color: Colors.black,
               border: Border(
                 top: BorderSide(
-                  color: Colors.grey.shade900, // Add border color
-                  width: 1, // Add border width
+                  color: Colors.grey.shade900,
+                  width: 1,
                 ),
               ),
             ),
             child: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.black, // Set background color to black
-              selectedItemColor: Colors.white, // Set selected item color
-              unselectedItemColor: Colors.grey[500], // Set unselected item color
+              backgroundColor: Colors.black,
+              selectedItemColor: Colors.white,
+              unselectedItemColor: Colors.grey[500],
               currentIndex: _page,
               onTap: navigationTapped,
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.location_history, size: 26),
+                  icon: Icon(Icons.location_history, size: 28),
                   label: 'connect',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.explore, size: 26),
+                  icon: Icon(Icons.explore, size: 28),
                   label: 'explore',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.add_circle, size: 26),
+                  icon: Icon(Icons.add_circle, size: 28),
                   label: 'upload',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.group, size: 26),
+                  icon: Icon(Icons.people_alt_rounded, size: 28),
                   label: 'friends',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.chat_bubble, size: 26),
+                  icon: Icon(Icons.chat_bubble, size: 28),
                   label: 'chat',
                 ),
               ],
-              selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white), // Adjust the selected label font size and weight
-              unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold), // Adjust the unselected label font size and weight
+              selectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+              unselectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
             ),
           ),
         ],

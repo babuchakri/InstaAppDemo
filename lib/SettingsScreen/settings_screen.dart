@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:login_form_one/SettingsScreen/UpdateProfilePhoto.dart';
+import 'package:login_form_one/social_media_ids_sharing/instagarm.dart';
+import 'package:login_form_one/social_media_ids_sharing/snapchat.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../LoginScreen.dart';
+import '../social_media_ids_sharing/facebook.dart';
 import 'SuggestionsScreen.dart';
 import 'UpdateBioScreen.dart';
 import 'UpdateEmailScreen.dart';
@@ -17,6 +22,60 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  bool facebookToggleState = false;
+  bool snapchatToggleState = false;
+  bool instagramToggleState = false;
+
+  String username = '';
+  String useremail = '';
+  String usernumber = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadToggleStates();
+    _loadUserDetails();
+  }
+
+  Future<void> _loadToggleStates() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+    setState(() {
+      facebookToggleState = data['facebookToggle'] ?? false;
+      snapchatToggleState = data['snapchatToggle'] ?? false;
+      instagramToggleState = data['instagramToggle'] ?? false;
+    });
+  }
+
+  Future<void> _loadUserDetails() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+
+    // Debugging: Print retrieved data
+    print("User data: $data");
+
+    setState(() {
+      username = data['name'] ?? 'Unknown';
+      useremail = data['email'] ?? 'Unknown';
+      usernumber = data['phoneNumber'] ?? 'Unknown';
+    });
+
+
+  }
+
+  Future<void> _saveToggleState(String key, bool value) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({key: value});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -43,6 +102,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildSectionHeading('Share Social Media Accounts'),
+
+            _buildSocialMediaItem('Facebook', Icons.facebook, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Facebook()),
+              );
+            }, facebookToggleState, (value) {
+              setState(() {
+                facebookToggleState = value;
+                _saveToggleState('facebookToggle', value);
+              });
+            }),
+
+            _buildSocialMediaItem('Snapchat', Icons.snapchat, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Snapchat()),
+              );
+            }, snapchatToggleState, (value) {
+              setState(() {
+                snapchatToggleState = value;
+                _saveToggleState('snapchatToggle', value);
+              });
+            }),
+
+            _buildSocialMediaItem('Instagram', Icons.camera, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Instagram()),
+              );
+            }, instagramToggleState, (value) {
+              setState(() {
+                instagramToggleState = value;
+                _saveToggleState('instagramToggle', value);
+              });
+            }),
+
+            const SizedBox(height: 20),
+
             _buildSectionHeading('Account Settings'),
             _buildSettingsItem('Update Profile', Icons.person, () {
               Navigator.pushReplacement(
@@ -82,9 +181,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }),
             SizedBox(height: 20),
             _buildSectionHeading('Personal Information'),
-            _buildInfoItem('Name', 'Veerababu', Icons.person),
-            _buildInfoItem('Email', 'chakridharavath06.com', Icons.email),
-            _buildInfoItem('Number', '9014282241', Icons.phone),
+            _buildInfoItem('Email', useremail, Icons.email),
+            _buildInfoItem('Number', usernumber, Icons.phone),
             SizedBox(height: 20),
             _buildSectionHeading('Manage privacy'),
             _buildSettingsItem('Privacy', Icons.privacy_tip, () {
@@ -162,7 +260,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+      trailing: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
       onTap: onTap,
     );
   }
@@ -182,6 +280,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value,
         style: const TextStyle(fontSize: 14, color: Colors.white),
       ),
+    );
+  }
+
+  Widget _buildSocialMediaItem(String title, IconData icon, VoidCallback onTap, bool isOn, ValueChanged<bool> onChanged) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: onTap,
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Switch(
+            value: isOn,
+            onChanged: onChanged,
+            activeColor: Colors.green,
+            inactiveThumbColor: Colors.red,
+          ),
+        ],
+      ),
+      onTap: onTap,
     );
   }
 }

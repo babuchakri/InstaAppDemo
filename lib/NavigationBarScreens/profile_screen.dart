@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
-import 'feed_screen.dart';
 import 'individual_chat_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -15,9 +14,13 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen>
+    with AutomaticKeepAliveClientMixin<ProfileScreen> {
   Map<String, dynamic> userData = {};
   bool isLoading = false;
+
+  @override
+  bool get wantKeepAlive => true; // Required for keeping the state alive
 
   @override
   void initState() {
@@ -48,13 +51,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Ensure to call super.build(context) to maintain state
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -228,46 +233,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return const Center(
                       child: CircularProgressIndicator());
                 }
-                return Wrap(
-                  spacing: 5,
-                  runSpacing: 5,
-                  children: [
-                    for (var doc in snapshot.data!.docs)
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailPage(
-                                imageUrl: doc['postUrl'],
-                                username: doc['username'],
-                                profImage: doc['profImage'],
-                                description: doc['description'],
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: (MediaQuery.of(context).size.width -
-                              50) /
-                              3,
-                          height: (MediaQuery.of(context).size.width -
-                              50) /
-                              3,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            image: DecorationImage(
-                              image: NetworkImage(doc['postUrl']),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+                var docs = snapshot.data!.docs;
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate:
+                  SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                  ),
+                  itemCount: docs.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    var doc = docs[index];
+                    return PostItem(
+                      postUrl: doc['postUrl'],
+                    );
+                  },
                 );
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class PostItem extends StatefulWidget {
+  final String postUrl;
+
+  const PostItem({Key? key, required this.postUrl}) : super(key: key);
+
+  @override
+  _PostItemState createState() => _PostItemState();
+}
+
+class _PostItemState extends State<PostItem>
+    with AutomaticKeepAliveClientMixin<PostItem> {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // Ensure to call super.build(context) to maintain state
+
+    return GestureDetector(
+      onTap: () {
+        // Handle onTap event
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          image: DecorationImage(
+            image: NetworkImage(widget.postUrl),
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
