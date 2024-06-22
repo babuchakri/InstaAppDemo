@@ -31,126 +31,123 @@ class _BirthGenderScreenState extends State<BirthGenderScreen> {
           padding: const EdgeInsets.all(16.0),
           child: SizedBox(
             height: 310,
-            child: Container(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    controller: _birthDateController,
+                    decoration: const InputDecoration(
+                      labelText: 'Birth Date',
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    readOnly: true,
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          selectedDate = picked.toString().split(' ')[0];
+                          _birthDateController.text = selectedDate;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Select Gender',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        DropdownButton<String>(
+                          value: selectedGender.isEmpty ? null : selectedGender,
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          onChanged: (String? value) {
+                            setState(() {
+                              selectedGender = value!;
+                            });
+                          },
+                          items: const [
+                            DropdownMenuItem<String>(
+                              value: 'Male',
+                              child: Text('Male'),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'Female',
+                              child: Text('Female'),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'Other',
+                              child: Text('Other'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+              SizedBox(
+                width: double.infinity,
 
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextFormField(
-                      controller: _birthDateController,
-                      decoration: const InputDecoration(
-                        labelText: 'Birth Date',
-                        border: OutlineInputBorder(),
-                        suffixIcon: Icon(Icons.calendar_today),
-                      ),
-                      readOnly: true,
-                      onTap: () async {
-                        final DateTime? picked = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime.now(),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      String birth = _birthDateController.text;
+                      if (birth.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Date of birth is required'),
+                            backgroundColor: Colors.red,
+                          ),
                         );
-                        if (picked != null) {
-                          setState(() {
-                            selectedDate = picked.toString().split(' ')[0];
-                            _birthDateController.text = selectedDate;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16.0),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Select Gender',
-                            style: TextStyle(fontSize: 16.0),
+                      } else if (selectedGender.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select gender'),
+                            backgroundColor: Colors.red,
                           ),
-                          DropdownButton<String>(
-                            value: selectedGender.isEmpty ? null : selectedGender,
-                            icon: const Icon(Icons.keyboard_arrow_down),
-                            onChanged: (String? value) {
-                              setState(() {
-                                selectedGender = value!;
-                              });
-                            },
-                            items: const [
-                              DropdownMenuItem<String>(
-                                value: 'Male',
-                                child: Text('Male'),
-                              ),
-                              DropdownMenuItem<String>(
-                                value: 'Female',
-                                child: Text('Female'),
-                              ),
-                              DropdownMenuItem<String>(
-                                value: 'Other',
-                                child: Text('Other'),
-                              ),
-                            ],
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EmailPasswordScreen(
+                              name: widget.name,
+                              birth: birth,
+                              gender: selectedGender,
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16.0),
-                SizedBox(
-                  width: double.infinity,
+                        );
+                      }
+                    },
 
-                    child: ElevatedButton(
-                      onPressed: () {
-                        String birth = _birthDateController.text;
-                        if (birth.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Date of birth is required'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        } else if (selectedGender.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please select gender'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EmailPasswordScreen(
-                                name: widget.name,
-                                birth: birth,
-                                gender: selectedGender,
-                              ),
-                            ),
-                          );
-                        }
-                      },
-
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0), // Adjust border radius
-                          ),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all<Color>(Colors.blue),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0), // Adjust border radius
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: const Text('Continue',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 25),),
-                      ),
                     ),
-                )],
-                ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child: Text('Continue',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 25),),
+                    ),
+                  ),
+              )],
               ),
             ),
           ),

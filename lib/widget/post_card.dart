@@ -3,13 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_view/photo_view.dart';
 
-import '../models/comments.dart'; // Make sure to update the import path as per your project structure.
+import '../models/comments.dart';
 
 class PostCard extends StatefulWidget {
   final Map<String, dynamic> snap;
 
-  const PostCard({Key? key, required this.snap}) : super(key: key);
+  const PostCard({super.key, required this.snap});
 
   @override
   _PostCardState createState() => _PostCardState();
@@ -69,6 +70,38 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.black,
+          insetPadding: EdgeInsets.all(0),
+          child: Stack(
+            children: [
+              PhotoView(
+                imageProvider: NetworkImage(imageUrl),
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 2,
+                backgroundDecoration: BoxDecoration(color: Colors.black),
+              ),
+              Positioned(
+                top: 30,
+                right: 20,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: Colors.white),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -80,9 +113,14 @@ class _PostCardState extends State<PostCard> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundImage: CachedNetworkImageProvider(widget.snap['profImage']),
+          Column(
+            children: [
+              const SizedBox(height: 6), // Adjust this value to position the avatar
+              CircleAvatar(
+                radius: 18,
+                backgroundImage: CachedNetworkImageProvider(widget.snap['profImage']),
+              ),
+            ],
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -111,14 +149,14 @@ class _PostCardState extends State<PostCard> {
                             ),
                             TextSpan(
                               text: _formatTimestamp(widget.snap['datePublished']),
-                              style: TextStyle(color: Colors.white70, fontSize: 12),
+                              style: const TextStyle(color: Colors.white70, fontSize: 12),
                             ),
                           ],
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Icon(Icons.more_horiz, color: Colors.white70),
+                    const Icon(Icons.more_horiz, color: Colors.white),
                   ],
                 ),
                 const SizedBox(height: 0),
@@ -127,15 +165,18 @@ class _PostCardState extends State<PostCard> {
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 13),
                 ),
                 const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: CachedNetworkImage(
-                    imageUrl: widget.snap['postUrl'],
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(),
+                GestureDetector(
+                  onTap: () => _showFullScreenImage(context, widget.snap['postUrl']),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.snap['postUrl'],
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(), // Added loading indicator
+                      ),
+                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                      fit: BoxFit.cover,
                     ),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -144,7 +185,6 @@ class _PostCardState extends State<PostCard> {
                   children: [
                     Row(
                       children: [
-                        // Update in PostCard widget
                         IconButton(
                           icon: const Icon(Icons.comment, color: Colors.grey),
                           onPressed: () {
@@ -156,16 +196,12 @@ class _PostCardState extends State<PostCard> {
                           },
                           iconSize: 20,
                         ),
-
+                        const SizedBox(width: 0), // Adjust spacing here
                         Text(
                           '$commentCount',
-                          style: TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.poll_outlined , color: Colors.grey),
-                          onPressed: () {},
-                          iconSize: 20,
-                        ),
+                        const SizedBox(width: 12), // Adjust spacing here
                         IconButton(
                           icon: Icon(
                             isLiked ? Icons.favorite : Icons.favorite_border,
@@ -174,16 +210,12 @@ class _PostCardState extends State<PostCard> {
                           onPressed: _toggleLike,
                           iconSize: 20,
                         ),
+                        const SizedBox(width: 0), // Adjust spacing here
                         Text(
                           '$likeCount',
-                          style: TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ],
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.share, color: Colors.grey),
-                      onPressed: () {},
-                      iconSize: 20,
                     ),
                   ],
                 ),
@@ -200,4 +232,5 @@ class _PostCardState extends State<PostCard> {
     return DateFormat('h:mm a · MMM d, yyyy').format(date);
   }
 }
-//hello world
+
+

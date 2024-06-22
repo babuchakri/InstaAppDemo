@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:login_form_one/providers/user_provider.dart';
@@ -7,7 +6,7 @@ import 'package:login_form_one/resources/firestore_methods.dart';
 import 'package:provider/provider.dart';
 
 class AddPostScreen extends StatefulWidget {
-  const AddPostScreen({Key? key}) : super(key: key);
+  const AddPostScreen({super.key});
 
   @override
   State<AddPostScreen> createState() => _AddPostScreenState();
@@ -99,11 +98,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: clearImage,
-        ),
-        title: Text(
+        automaticallyImplyLeading: false, // Prevent automatic back button
+        title: const Text(
           "new post",
           style: TextStyle(
             color: Colors.white,
@@ -111,15 +107,19 @@ class _AddPostScreenState extends State<AddPostScreen> {
             fontSize: 24,
           ),
         ),
-        centerTitle: false,
         actions: [
+          if (_file != null)
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: clearImage,
+            ),
           TextButton(
             onPressed: () => postImage(
               user!.uid,
               user.username,
               user.photoUrl,
             ),
-            child: Text(
+            child: const Text(
               "post",
               style: TextStyle(
                 color: Colors.blue,
@@ -133,22 +133,22 @@ class _AddPostScreenState extends State<AddPostScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _isLoading ? LinearProgressIndicator() : SizedBox(height: 1),
-          SizedBox(height: 10),
+          _isLoading ? const LinearProgressIndicator() : const SizedBox(height: 1),
+          const SizedBox(height: 10),
           if (_showImageError)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 "Please select an image to post",
-                style: TextStyle(color: Colors.red, fontSize: 20,fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
           if (_showSuccessMessage)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 "Posted successfully",
-                style: TextStyle(color: Colors.green, fontSize: 20,fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.green, fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
           Expanded(
@@ -177,7 +177,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.add_a_photo,
                         size: 80,
                         color: Colors.white,
@@ -192,16 +192,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: TextField(
                 controller: _descriptionController,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: "Write a caption...",
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: Colors.white70),
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey[800]!),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.white),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   filled: true,

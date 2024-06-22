@@ -1,15 +1,16 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:login_form_one/NavigationBarScreens/add_post_screen.dart';
-import 'package:login_form_one/NavigationBarScreens/chat_screen.dart';
 import 'package:login_form_one/NavigationBarScreens/connect_screen.dart';
 import 'package:login_form_one/NavigationBarScreens/feed_screen.dart';
 import '../NavigationBarScreens/FriendsScreen.dart';
+import '../NavigationBarScreens/profile_screen.dart';
 
 class MobileScreen extends StatefulWidget {
-  const MobileScreen({Key? key}) : super(key: key);
+  const MobileScreen({super.key});
 
   @override
   State<MobileScreen> createState() => _MobileScreenState();
@@ -61,9 +62,7 @@ class _MobileScreenState extends State<MobileScreen> {
     if (!isLocationServiceEnabled) {
       Geolocator.requestPermission().then((locationPermission) {
         if (locationPermission == LocationPermission.denied) {
-          print('Location permission denied.');
         } else if (locationPermission == LocationPermission.deniedForever) {
-          print('Location permission permanently denied.');
         } else {
           positionStreamSubscription = Geolocator.getPositionStream().listen((Position position) {
             setState(() {
@@ -73,7 +72,6 @@ class _MobileScreenState extends State<MobileScreen> {
           setState(() {
             isLocationServiceEnabled = true;
           });
-          print('Location service activated.');
         }
       });
     }
@@ -85,7 +83,6 @@ class _MobileScreenState extends State<MobileScreen> {
       setState(() {
         isLocationServiceEnabled = false;
       });
-      print('Location service stopped.');
     }
   }
 
@@ -97,62 +94,102 @@ class _MobileScreenState extends State<MobileScreen> {
         controller: pageController,
         onPageChanged: onPageChanged,
         physics: const NeverScrollableScrollPhysics(),
-        children: const [
-          ConnectScreen(),
-          FeedScreen(),
-          AddPostScreen(),
-          FriendsScreen(),
-          ChatScreen(currentUserId: ''),
+        children: [
+          const ConnectScreen(),
+          const FeedScreen(),
+          const AddPostScreen(),
+          const FriendsScreen(),
+          ProfileScreen(
+            uid: FirebaseAuth.instance.currentUser!.uid,
+            currentUserId: FirebaseAuth.instance.currentUser!.uid,
+          ),
         ],
       ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            height: 0.0,
-            color: Colors.grey,
+            height: 0.4,
+            color: Colors.grey.shade900,
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.black,
+              color: Colors.grey.shade900,
               border: Border(
                 top: BorderSide(
                   color: Colors.grey.shade900,
-                  width: 1,
+                  width: 0.5,
                 ),
               ),
             ),
             child: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.black,
+              backgroundColor: Colors.black45,
               selectedItemColor: Colors.white,
               unselectedItemColor: Colors.grey[500],
               currentIndex: _page,
               onTap: navigationTapped,
-              items: const <BottomNavigationBarItem>[
+              items: [
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.location_history, size: 28),
+                  icon: ImageIcon(
+                    AssetImage(
+                      _page == 0
+                          ? 'lib/images/veera.png'
+                          : 'lib/images/globe-network.png',
+                    ),
+                    size: 23,
+                  ),
                   label: 'connect',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.explore, size: 28),
+                  icon: ImageIcon(
+                    AssetImage(
+                      _page == 1
+                          ? 'lib/images/home.png'
+                          : 'lib/images/homeoutlined.png',
+                    ),
+                    size: 23,
+                  ),
                   label: 'explore',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.add_circle, size: 28),
+                  icon: ImageIcon(
+                    AssetImage(
+                      _page == 2
+                          ? 'lib/images/add.png'
+                          : 'lib/images/circle.png',
+                    ),
+                    size: 25,
+                  ),
                   label: 'upload',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.people_alt_rounded, size: 28),
+                  icon: ImageIcon(
+                    AssetImage(
+                      _page == 3
+                          ? 'lib/images/user.png'
+                          : 'lib/images/people-outlinede.png',
+                    ),
+                    size: 23,
+                  ),
                   label: 'friends',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.chat_bubble, size: 28),
-                  label: 'chat',
+                  icon: ImageIcon(
+                    AssetImage(
+                      _page == 4
+                          ? 'lib/images/profile-user.png'
+                          : 'lib/images/useroutlined.png',
+                    ),
+                    size: 23,
+                  ),
+                  label: 'profile',
                 ),
               ],
-              selectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-              unselectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
+              selectedLabelStyle: const TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+              unselectedLabelStyle:
+              const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey),
             ),
           ),
         ],

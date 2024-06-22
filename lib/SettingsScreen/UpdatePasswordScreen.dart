@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdatePasswordScreen extends StatefulWidget {
-  const UpdatePasswordScreen({Key? key}) : super(key: key);
+  const UpdatePasswordScreen({super.key});
 
   @override
   State<UpdatePasswordScreen> createState() => _UpdatePasswordScreenState();
@@ -48,7 +48,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
 
           // Show a success message
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Password updated successfully', style: TextStyle(color: Colors.green))),
+            const SnackBar(content: Text('Password updated successfully', style: TextStyle(color: Colors.green))),
           );
 
           // Navigate back to settings screen
@@ -59,12 +59,12 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update password: $e', style: TextStyle(color: Colors.red))),
+          SnackBar(content: Text('Failed to update password: $e', style: const TextStyle(color: Colors.red))),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter both current and new password', style: TextStyle(color: Colors.red))),
+        const SnackBar(content: Text('Please enter both current and new password', style: TextStyle(color: Colors.red))),
       );
     }
   }
@@ -74,12 +74,12 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
+        title: const Text(
           'Update Password',
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -95,12 +95,12 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
               decoration: BoxDecoration(
                 color: Colors.grey.shade800.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: Center(
+              child: const Center(
                 child: Text(
                   'The updated password will be used for secure access',
                   style: TextStyle(
@@ -111,35 +111,35 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _currentPasswordController,
               decoration: InputDecoration(
                 labelText: 'Enter current password',
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               obscureText: true, // Hide the entered password
               enabled: !_isPasswordUpdated, // Disable controller if password is updated
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _newPasswordController,
               decoration: InputDecoration(
                 labelText: 'Enter new password',
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               obscureText: true, // Hide the entered password
               enabled: !_isPasswordUpdated, // Disable controller if password is updated
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: !_isPasswordUpdated ? _updatePassword : null, // Disable button if password is updated
               style: ElevatedButton.styleFrom(
@@ -148,8 +148,8 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: Text(
                   'Update',
                   style: TextStyle(
@@ -161,8 +161,8 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
               ),
             ),
             if (_isPasswordUpdated)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
                 child: Text(
                   'Password updated successfully',
                   textAlign: TextAlign.center,

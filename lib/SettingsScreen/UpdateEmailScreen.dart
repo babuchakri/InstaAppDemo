@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdateEmailScreen extends StatefulWidget {
-  const UpdateEmailScreen({Key? key}) : super(key: key);
+  const UpdateEmailScreen({super.key});
 
   @override
   State<UpdateEmailScreen> createState() => _UpdateEmailScreenState();
@@ -39,7 +39,7 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid email')),
+        const SnackBar(content: Text('Please enter a valid email')),
       );
     }
   }
@@ -60,7 +60,7 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Email updated successfully')),
+          const SnackBar(content: Text('Email updated successfully')),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,12 +87,12 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
+        title: const Text(
           'Update Email',
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -108,12 +108,12 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
               decoration: BoxDecoration(
                 color: Colors.grey.shade800.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: Center(
+              child: const Center(
                 child: Text(
                   'The updated email will be used for notifications',
                   style: TextStyle(
@@ -124,19 +124,19 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
                 labelText: 'Enter new email',
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _updateEmail,
               style: ElevatedButton.styleFrom(
@@ -145,8 +145,8 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: Text(
                   'Update',
                   style: TextStyle(
@@ -158,16 +158,16 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
               ),
             ),
             if (_verificationEmailSent) ...[
-              SizedBox(height: 16.0),
-              Text(
+              const SizedBox(height: 16.0),
+              const Text(
                 'Verification link sent to your email. Please verify.',
                 style: TextStyle(color: Colors.yellow),
                 textAlign: TextAlign.center,
               ),
             ],
             if (_emailUpdated) ...[
-              SizedBox(height: 16.0),
-              Text(
+              const SizedBox(height: 16.0),
+              const Text(
                 'Email updated successfully!',
                 style: TextStyle(color: Colors.green),
                 textAlign: TextAlign.center,

@@ -21,7 +21,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
   final List<CustomUser.User> _nearbyUsers = [];
   bool _isLoading = false;
   final _random = Random();
-  late StreamSubscription<Position> _positionStreamSubscription; // Updated to non-nullable
+  late StreamSubscription<Position>
+  _positionStreamSubscription; // Updated to non-nullable
 
   @override
   void initState() {
@@ -55,27 +56,28 @@ class _ConnectScreenState extends State<ConnectScreen> {
   }
 
   void _updateLocation() {
-    _positionStreamSubscription = Geolocator.getPositionStream().listen((Position position) async {
-      setState(() {
-        _currentPosition = position;
-        if (!_isLoading) {
-          _updateNearbyUsers();
-        }
-      });
+    _positionStreamSubscription =
+        Geolocator.getPositionStream().listen((Position position) async {
+          setState(() {
+            _currentPosition = position;
+            if (!_isLoading) {
+              _updateNearbyUsers();
+            }
+          });
 
-      if (_currentPosition != null) {
-        double currentLat = _currentPosition!.latitude;
-        double currentLong = _currentPosition!.longitude;
+          if (_currentPosition != null) {
+            double currentLat = _currentPosition!.latitude;
+            double currentLong = _currentPosition!.longitude;
 
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .update({
-          'latitude': currentLat,
-          'longitude': currentLong,
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(FirebaseAuth.instance.currentUser!.uid)
+                .update({
+              'latitude': currentLat,
+              'longitude': currentLong,
+            });
+          }
         });
-      }
-    });
   }
 
   void _showLocationServiceDisabledDialog() {
@@ -142,7 +144,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
           if (userData != null &&
               userData.containsKey('latitude') &&
-              userData.containsKey('longitude')) {
+              userData.containsKey('longitude') &&
+              userData['visibilityToggle'] == true) {
+            // Check visibilityToggle
             double userLatitude = userData['latitude'];
             double userLongitude = userData['longitude'];
 
@@ -174,7 +178,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -182,7 +186,10 @@ class _ConnectScreenState extends State<ConnectScreen> {
             ? const Center(
           child: Text(
             'No nearby users found',
-            style: TextStyle(color: Colors.white, fontSize: 20),
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
           ),
         )
             : _buildNearbyUsersList(),
@@ -193,59 +200,76 @@ class _ConnectScreenState extends State<ConnectScreen> {
   Widget _buildNearbyUsersList() {
     double bottomNavBarHeight = kBottomNavigationBarHeight;
     double screenHeight = MediaQuery.of(context).size.height;
+    double avatarRadius = 38; // Radius of the circle avatar
+    double minDistance = avatarRadius * 2.5; // Minimum distance between avatars
 
-    return Stack(
-      children: _nearbyUsers
-          .where((user) => _isWithinRange(user.latitude, user.longitude, 20))
-          .map((user) {
-        double left =
-            _random.nextDouble() * (MediaQuery.of(context).size.width - 80);
-        double top = _random.nextDouble() *
+    List<Positioned> positionedAvatars = [];
+
+    for (CustomUser.User user in _nearbyUsers) {
+      double left = 0, top = 0; // Initialize left and top here
+
+      bool positionFound = false;
+
+      // Try to find a non-overlapping position
+      while (!positionFound) {
+        left = _random.nextDouble() * (MediaQuery.of(context).size.width - 80);
+        top = _random.nextDouble() *
             (screenHeight -
                 MediaQuery.of(context).padding.bottom -
                 bottomNavBarHeight -
-                90); // Adjusted height to avoid bottom navigation bar
-        return Positioned(
-          left: left,
-          top: top,
-          child: GestureDetector(
-            onTap: () {
-              _showUserProfileDialog(user);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 0.7, // Adjust border width as needed
+                90);
+
+        // Check against already positioned avatars
+        bool overlaps = positionedAvatars.any((positionedAvatar) {
+          double existingLeft = positionedAvatar.left!;
+          double existingTop = positionedAvatar.top!;
+          double distance =
+          sqrt(pow(left - existingLeft, 2) + pow(top - existingTop, 2));
+          return distance < minDistance;
+        });
+
+        if (!overlaps) {
+          positionFound = true;
+        }
+      }
+
+      Positioned positionedAvatar = Positioned(
+        left: left,
+        top: top,
+        child: GestureDetector(
+          onTap: () {
+            _showUserProfileDialog(user);
+          },
+          child:  Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.grey,
+                width: 1.0, // Slightly thicker border
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 5.0,
+                  offset: Offset(0, 4),
                 ),
-              ),
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.black,
-                backgroundImage: NetworkImage(user.photoUrl),
-              ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: avatarRadius,
+              backgroundColor: Colors.white,
+              backgroundImage: NetworkImage(user.photoUrl),
             ),
           ),
-        );
-      }).toList(),
+        ),
+      );
+
+      positionedAvatars.add(positionedAvatar);
+    }
+
+    return Stack(
+      children: positionedAvatars,
     );
-  }
-
-  bool _isWithinRange(double lat, double long, double range) {
-    if (_currentPosition == null) return false;
-
-    double currentLat = _currentPosition!.latitude;
-    double currentLong = _currentPosition!.longitude;
-
-    double distanceInMeters = Geolocator.distanceBetween(
-      currentLat,
-      currentLong,
-      lat,
-      long,
-    );
-
-    return distanceInMeters <= range;
   }
 
   void _showUserProfileDialog(CustomUser.User user) async {
@@ -267,9 +291,12 @@ class _ConnectScreenState extends State<ConnectScreen> {
       userAlreadyAdded = true;
     }
 
+
     bool liked = false;
     bool loved = false;
     bool connected = false;
+
+
 
     // Fetch user's social media sharing settings
     DocumentSnapshot userSettingsSnapshot = await FirebaseFirestore.instance
@@ -279,6 +306,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
     Map<String, dynamic> userSettings =
     userSettingsSnapshot.data() as Map<String, dynamic>;
 
+
+
     bool showSnapchat = userSettings['snapchatToggle'] ?? false;
     bool showInstagram = userSettings['instagramToggle'] ?? false;
     String snapchatId = showSnapchat ? user.snapchatId ?? '' : '';
@@ -286,12 +315,18 @@ class _ConnectScreenState extends State<ConnectScreen> {
     bool showFacebook = userSettings['facebookToggle'] ?? false;
     String facebookId = showFacebook ? user.facebookId ?? '' : '';
 
+
+
     // Check if user.likes and user.hearts are integers or lists
     List<int> likesList = [user.likes];
     List<int> heartsList = [user.hearts];
 
+
+
     liked = likesList.contains(currentUserId);
     loved = heartsList.contains(currentUserId);
+
+
 
     // Disable actions if already performed
     bool likeDisabled = liked;
@@ -311,7 +346,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
               height: 500,
               child: Center(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(5.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: Colors.black,
@@ -342,11 +377,10 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                   ),
                                   Text(
                                     snapchatId,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold
-                                    ),
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
@@ -364,11 +398,10 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                   ),
                                   Text(
                                     instagramId,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold
-                                    ),
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
@@ -386,11 +419,10 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                   ),
                                   Text(
                                     facebookId,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold
-                                    ),
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
@@ -416,7 +448,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                         FirebaseFirestore.instance
                                             .collection('friends')
                                             .doc(currentUserId)
-                                            .collection('user_friends')
+                                            .collection(
+                                            'user_friends')
                                             .doc(user.uid);
 
                                         try {
@@ -424,25 +457,37 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                             'username': user.username,
                                             'uid': user.uid,
                                             'email': user.email,
+                                            'photoUrl' : user.photoUrl,
                                           });
                                           setState(() {
                                             connected = true;
                                           });
-                                          Provider.of<UserProvider>(context,
+                                          Provider.of<UserProvider>(
+                                              context,
                                               listen: false)
-                                              .setSelectedUserProfile(user);
+                                              .setSelectedUserProfile(
+                                              user);
                                           Navigator.of(context).pop();
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(
+                                              backgroundColor:
+                                              Colors.green,
                                               content: Text(
-                                                  'User added to friends list'),
+                                                'User added to friends list',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                    FontWeight.bold,
+                                                    fontSize: 23),
+                                              ),
                                               duration:
-                                              Duration(seconds: 2),
+                                              Duration(seconds: 1),
                                             ),
                                           );
                                           // Increment connect count when user is added as a friend
-                                          await _incrementConnectCount(user);
+                                          await _incrementConnectCount(
+                                              user);
                                           await _sendNotification(
                                               user,
                                               'Connected',
@@ -451,33 +496,16 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                               FirebaseAuth.instance
                                                   .currentUser!.photoURL);
                                         } catch (e) {
-                                          print('Error adding friend: $e');
+                                          print(
+                                              'Error adding friend: $e');
                                         }
                                       },
                                     ),
                                     Text(
-                                      userAlreadyAdded ? 'Connected' : 'Connect',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.chat_bubble,
-                                         size: 25,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: () {
-                                        // Handle request action
-                                      },
-                                    ),
-                                    Text(
-                                      'Chat',
-                                      style: TextStyle(
+                                      userAlreadyAdded
+                                          ? 'Connected'
+                                          : 'connect',
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -489,9 +517,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                       icon: Icon(
                                         Icons.favorite,
                                         size: 25,
-                                        color: loved
-                                            ? Colors.red
-                                            : Colors.white,
+                                        color: loved ? Colors.red : Colors.red,
                                       ),
                                       onPressed: favoriteDisabled
                                           ? null
@@ -500,21 +526,39 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                         setState(() {
                                           loved = true;
                                         });
+                                        Navigator.of(context)
+                                            .pop(); // Close dialog
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            backgroundColor: Colors.red,
+                                            content: Text(
+                                              'You sent a heart to user',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight:
+                                                  FontWeight.bold,
+                                                  fontSize: 23),
+                                            ),
+                                            duration:
+                                            Duration(seconds: 1),
+                                          ),
+                                        );
                                         await _sendNotification(
                                             user,
                                             'Love',
                                             'You received a heart from $currentUsername',
                                             currentUsername,
-                                            FirebaseAuth
-                                                .instance.currentUser!
-                                                .photoURL);
+                                            FirebaseAuth.instance
+                                                .currentUser!.photoURL);
                                       },
                                     ),
-                                    Text(
-                                      'Love',
+                                    const Text(
+                                      'love',
                                       style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -524,9 +568,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                       icon: Icon(
                                         Icons.thumb_up,
                                         size: 25,
-                                        color: liked
-                                            ? Colors.blue
-                                            : Colors.white,
+                                        color:
+                                        liked ? Colors.blue : Colors.blue,
                                       ),
                                       onPressed: likeDisabled
                                           ? null
@@ -535,21 +578,39 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                         setState(() {
                                           liked = true;
                                         });
+                                        Navigator.of(context)
+                                            .pop(); // Close dialog
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            backgroundColor: Colors.blue,
+                                            content: Text(
+                                              'You sent a like to user',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight:
+                                                  FontWeight.bold,
+                                                  fontSize: 23),
+                                            ),
+                                            duration:
+                                            Duration(seconds: 1),
+                                          ),
+                                        );
                                         await _sendNotification(
                                             user,
                                             'Liked',
                                             'You have been liked by $currentUsername',
                                             currentUsername,
-                                            FirebaseAuth
-                                                .instance.currentUser!
-                                                .photoURL);
+                                            FirebaseAuth.instance
+                                                .currentUser!.photoURL);
                                       },
                                     ),
-                                    Text(
-                                      'Like',
+                                    const Text(
+                                      'like',
                                       style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -569,11 +630,10 @@ class _ConnectScreenState extends State<ConnectScreen> {
     );
   }
 
-
   Future<void> _incrementLikeCount(CustomUser.User user) async {
     try {
       DocumentReference userRef =
-          FirebaseFirestore.instance.collection('users').doc(user.uid);
+      FirebaseFirestore.instance.collection('users').doc(user.uid);
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(userRef);
@@ -593,7 +653,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
   Future<void> _incrementConnectCount(CustomUser.User user) async {
     try {
       DocumentReference userRef =
-          FirebaseFirestore.instance.collection('users').doc(user.uid);
+      FirebaseFirestore.instance.collection('users').doc(user.uid);
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(userRef);
@@ -613,7 +673,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
   Future<void> _incrementHeartCount(CustomUser.User user) async {
     try {
       DocumentReference userRef =
-          FirebaseFirestore.instance.collection('users').doc(user.uid);
+      FirebaseFirestore.instance.collection('users').doc(user.uid);
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(userRef);

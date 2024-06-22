@@ -22,7 +22,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => LoginScreen()
+                builder: (context) => const LoginScreen()
               ),
             ); // Navigate back when pressed
           },
@@ -86,8 +86,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         },
 
                         style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          backgroundColor: WidgetStateProperty.all<Color>(Colors.blue),
+                          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0), // Adjust border radius
                             ),

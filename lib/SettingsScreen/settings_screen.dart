@@ -15,7 +15,7 @@ import 'UpdateNumberScreen.dart';
 import 'UpdatePasswordScreen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -25,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool facebookToggleState = false;
   bool snapchatToggleState = false;
   bool instagramToggleState = false;
+  bool visibilityToggleState = false;
 
   String username = '';
   String useremail = '';
@@ -35,6 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     _loadToggleStates();
     _loadUserDetails();
+    _loadVisibilityToggleState();
   }
 
   Future<void> _loadToggleStates() async {
@@ -58,15 +60,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
     // Debugging: Print retrieved data
-    print("User data: $data");
 
     setState(() {
       username = data['name'] ?? 'Unknown';
       useremail = data['email'] ?? 'Unknown';
       usernumber = data['phoneNumber'] ?? 'Unknown';
     });
-
-
   }
 
   Future<void> _saveToggleState(String key, bool value) async {
@@ -74,6 +73,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .update({key: value});
+  }
+
+  Future<void> _loadVisibilityToggleState() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+    setState(() {
+      visibilityToggleState = data['visibilityToggle'] ?? false;
+    });
+  }
+
+  Future<void> _saveVisibilityToggleState(bool value) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'visibilityToggle': value});
   }
 
   @override
@@ -107,7 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSocialMediaItem('Facebook', Icons.facebook, () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Facebook()),
+                MaterialPageRoute(builder: (context) => const Facebook()),
               );
             }, facebookToggleState, (value) {
               setState(() {
@@ -138,6 +155,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 instagramToggleState = value;
                 _saveToggleState('instagramToggle', value);
               });
+            }),
+
+            _buildSocialMediaItem('Visibility', Icons.visibility, () {
+              _handleVisibilityToggle(!visibilityToggleState);
+            }, visibilityToggleState, (value) {
+              _handleVisibilityToggle(value);
             }),
 
             const SizedBox(height: 20),
@@ -179,11 +202,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => const UpdatePasswordScreen()),
               );
             }),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildSectionHeading('Personal Information'),
             _buildInfoItem('Email', useremail, Icons.email),
             _buildInfoItem('Number', usernumber, Icons.phone),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildSectionHeading('Manage privacy'),
             _buildSettingsItem('Privacy', Icons.privacy_tip, () {
               // Privacy logic
@@ -191,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSettingsItem('Notifications', Icons.notifications, () {
               // Notifications logic
             }),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildSectionHeading('Suggestions & About'),
             _buildSettingsItem('Suggestions', Icons.lightbulb_outline, () {
               Navigator.pushReplacement(
@@ -310,5 +333,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       onTap: onTap,
     );
+  }
+
+  void _handleVisibilityToggle(bool value) {
+    setState(() {
+      visibilityToggleState = value;
+    });
+    _saveVisibilityToggleState(value);
   }
 }

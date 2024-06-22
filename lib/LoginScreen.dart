@@ -7,11 +7,9 @@ import 'RegistrationScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
-
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -57,9 +55,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
+        automaticallyImplyLeading: false, // Disable the automatic back button
         title: Container(
-          margin: EdgeInsets.only(left: 25),
+          margin: const EdgeInsets.only(left: 25),
           child: const Text(
             'Login',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
@@ -124,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ForgotPasswordScreen(
+                              builder: (context) => const ForgotPasswordScreen(
 
                               ),
                             ),

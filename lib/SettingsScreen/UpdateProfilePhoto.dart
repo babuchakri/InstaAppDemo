@@ -8,7 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart';
 
 class UpdateProfilePhoto extends StatefulWidget {
-  const UpdateProfilePhoto({Key? key}) : super(key: key);
+  const UpdateProfilePhoto({super.key});
 
   @override
   State<UpdateProfilePhoto> createState() => _UpdateProfilePhotoState();
@@ -74,9 +74,9 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text('Update Profile Photo', style: TextStyle(color: Colors.white)),
+        title: const Text('Update Profile Photo', style: TextStyle(color: Colors.white)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -89,12 +89,12 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
               decoration: BoxDecoration(
                 color: Colors.grey.shade800.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: Center(
+              child: const Center(
                 child: Text(
                   'The updated profile photo will be visible on the profile page',
                   style: TextStyle(
@@ -105,7 +105,7 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             GestureDetector(
               onTap: _pickImage,
               child: Container(
@@ -122,7 +122,7 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
                       : null,
                 ),
                 child: _selectedImage == null
-                    ? Icon(
+                    ? const Icon(
                   Icons.camera_alt,
                   color: Colors.white,
                   size: 50.0,
@@ -130,7 +130,7 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
                     : null,
               ),
             ),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             Stack(
               alignment: Alignment.center,
               children: [
@@ -141,10 +141,10 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    minimumSize: Size(double.infinity, 50), // Button size
+                    minimumSize: const Size(double.infinity, 50), // Button size
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5.0),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 5.0),
                     child: Text(
                       'Update',
                       style: TextStyle(
@@ -156,14 +156,14 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
                   ),
                 ),
                 if (_isLoading)
-                  CircularProgressIndicator(
+                  const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
               ],
             ),
             if (_isPhotoUpdated)
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 20.0),
                 child: Text(
                   'Profile photo updated successfully',
                   style: TextStyle(
@@ -178,7 +178,7 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
                 padding: const EdgeInsets.only(top: 20.0),
                 child: Text(
                   _errorMessage!,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16.0,
                     color: Colors.red,
                   ),

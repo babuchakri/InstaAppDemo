@@ -37,6 +37,8 @@ class AuthMethods {
     required Uint8List file,
     double latitude = 0,
     double longitude = 0,
+    bool visibilityToggle = true, // Default visibility is true (visible)
+
   }) async {
     try {
       if (email.isNotEmpty &&
@@ -70,6 +72,8 @@ class AuthMethods {
           likes: 0, // Initialize likes count to zero
           hearts: 0, // Initialize hearts count to zero
           connected: 0,
+          visibilityToggle: visibilityToggle, // Set visibility toggle based on parameter
+
         );
 
         await _firestore.collection('users').doc(cred.user!.uid).set(user.toJson());

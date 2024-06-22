@@ -5,7 +5,7 @@ import '../resources/auth_models.dart';
 
 class UserProvider with ChangeNotifier {
   User? _user;
-  List<User> _selectedUserProfiles = [];
+  final List<User> _selectedUserProfiles = [];
   List<User> _friends = [];
 
   User? get getUser => _user;
@@ -21,7 +21,6 @@ class UserProvider with ChangeNotifier {
       User user = await _authMethods.getUserDetails();
       setUser(user);
     } catch (error) {
-      print('Error refreshing user: $error');
     }
   }
 
@@ -55,12 +54,10 @@ class UserProvider with ChangeNotifier {
       if (friendsSnapshot.docs.isNotEmpty) {
         _friends = friendsSnapshot.docs.map((doc) => User.fromSnapshot(doc)).toList();
       } else {
-        print('No friends found for the user.');
       }
 
       notifyListeners();
     } catch (error) {
-      print('Error fetching friends: $error');
     }
   }
 

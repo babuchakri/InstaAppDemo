@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdateNumberScreen extends StatefulWidget {
-  const UpdateNumberScreen({Key? key}) : super(key: key);
+  const UpdateNumberScreen({super.key});
 
   @override
   State<UpdateNumberScreen> createState() => _UpdateNumberScreenState();
@@ -48,12 +48,12 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
+        title: const Text(
           'Update Number',
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -69,12 +69,12 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
               decoration: BoxDecoration(
                 color: Colors.grey.shade800.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: Center(
+              child: const Center(
                 child: Text(
                   'The updated number will be used for verification purposes',
                   style: TextStyle(
@@ -85,32 +85,32 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _numberController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Enter new number',
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             if (_errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
                   _errorMessage!,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14.0,
                     color: Colors.red,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _updateNumber,
               style: ElevatedButton.styleFrom(
@@ -119,8 +119,8 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: Text(
                   'Update',
                   style: TextStyle(
@@ -132,8 +132,8 @@ class _UpdateNumberScreenState extends State<UpdateNumberScreen> {
               ),
             ),
             if (_isNumberUpdated)
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 20.0),
                 child: Text(
                   'Number updated successfully',
                   style: TextStyle(

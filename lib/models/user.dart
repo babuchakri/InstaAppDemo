@@ -19,6 +19,9 @@ class User {
   int hearts; // Add this field
   int connected;
 
+  bool visibilityToggle; // Add visibility toggle
+
+
   User({
     required this.uid,
     required this.username,
@@ -37,6 +40,8 @@ class User {
     required this.likes, // Initialize likes count
     required this.hearts, // Initialize hearts count
     required this.connected,
+    required this.visibilityToggle, // Initialize visibility toggle
+
   });
 
   factory User.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -69,6 +74,9 @@ class User {
       hearts: data['hearts'] ?? 0,
       // Default value in case not provided
       connected: data['connected'] ?? 0,
+      visibilityToggle: data['visibilityToggle'] ??
+          false, // Initialize visibility toggle
+
     );
   }
 
@@ -90,6 +98,8 @@ class User {
       'likes': likes, // Include likes count in JSON representation
       'hearts': hearts, // Include hearts count in JSON representation
       'connected': connected,
+      'visibilityToggle': visibilityToggle,
+
     };
   }
 }

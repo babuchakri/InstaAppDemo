@@ -1,14 +1,15 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
-import 'individual_chat_screen.dart';
+import 'full_post_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String uid;
   final String currentUserId;
 
-  const ProfileScreen({Key? key, required this.uid, required this.currentUserId})
-      : super(key: key);
+  const ProfileScreen({super.key, required this.uid, required this.currentUserId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -18,14 +19,17 @@ class _ProfileScreenState extends State<ProfileScreen>
     with AutomaticKeepAliveClientMixin<ProfileScreen> {
   Map<String, dynamic> userData = {};
   bool isLoading = false;
+  List<DocumentSnapshot<Map<String, dynamic>>> posts = [];
+  bool isPostsLoading = false;
 
   @override
-  bool get wantKeepAlive => true; // Required for keeping the state alive
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     getData();
+    getPosts();
   }
 
   Future<void> getData() async {
@@ -35,33 +39,67 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     try {
       var snap = await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
-      userData = snap.data() as Map<String, dynamic>;
+      if (snap.exists) {
+        setState(() {
+          userData = snap.data() as Map<String, dynamic>;
+        });
+      } else {
+        setState(() {
+          userData = {};
+        });
+      }
     } catch (e) {
-      // Handle error
+      print("Error fetching user data: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
 
+  Future<void> getPosts() async {
     setState(() {
-      isLoading = false;
+      isPostsLoading = true;
     });
+
+    try {
+      var snap = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('uid', isEqualTo: widget.uid)
+          .get();
+      setState(() {
+        posts = snap.docs;
+      });
+    } catch (e) {
+      print("Error fetching posts: $e");
+    } finally {
+      setState(() {
+        isPostsLoading = false;
+      });
+    }
   }
 
   Future<void> refreshData() async {
     await getData();
+    await getPosts();
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Ensure to call super.build(context) to maintain state
+    super.build(context);
 
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.black45,
         elevation: 0,
-        leading: IconButton(
+        leading: widget.currentUserId == widget.uid
+            ? null
+            : IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.of(context).pop();
           },
         ),
         title: const Text(
@@ -80,191 +118,149 @@ class _ProfileScreenState extends State<ProfileScreen>
                   context,
                   MaterialPageRoute(builder: (context) => const SettingsScreen()),
                 );
-                await refreshData(); // Refresh data when returning from settings
               },
             )
           else
             IconButton(
-              icon: const Icon(Icons.send, color: Colors.white),
+              icon: const Icon(Icons.more_vert, color: Colors.white),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => IndividualChatScreen(
-                      currentUserId: widget.currentUserId,
-                      otherUserId: widget.uid,
-                    ),
-                  ),
-                );
+                // Handle more options
               },
             ),
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            onPressed: () {
-              // Handle more options
-            },
-          ),
         ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 38,
-                  backgroundImage: NetworkImage(userData['photoUrl'] ?? ''),
-                ),
-                const SizedBox(width: 20),
-                Column(
+          : RefreshIndicator(
+        onRefresh: refreshData,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      userData['username'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundImage: CachedNetworkImageProvider(
+                            userData['photoUrl'] ?? '',
+                          ),
+                          backgroundColor: Colors.grey[200],
+                        ),
+                        const SizedBox(width: 20),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              userData['username'] ?? '',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              userData['bio'] ?? '',
+                              textAlign: TextAlign.start,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      userData['bio'] ?? '',
-                      textAlign: TextAlign.start,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.white,
-                      ),
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildStatColumn('connected', userData['connected']),
+                        _buildStatColumn('hearts', userData['hearts']),
+                        _buildStatColumn('likes', userData['likes']),
+                      ],
                     ),
+                    const SizedBox(height: 30), // Adjusted to reduce gap
+
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      userData['connected'].toString(),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'Connected',
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      userData['hearts'].toString(),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'Hearts',
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      userData['likes'].toString(),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'Likes',
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 40),
-            const Text(
-              'Recent Posts',
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 10),
-            FutureBuilder(
-              future: FirebaseFirestore.instance
-                  .collection('posts')
-                  .where('uid', isEqualTo: widget.uid)
-                  .get(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Center(
-                      child: CircularProgressIndicator());
-                }
-                var docs = snapshot.data!.docs;
-
-                return GridView.builder(
+            isPostsLoading
+                ? const SliverToBoxAdapter(
+              child: Center(child: CircularProgressIndicator()),
+            )
+                : posts.isEmpty
+                ? const SliverToBoxAdapter(
+              child: Center(
+                child: Text(
+                  'No posts available',
+                  style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),
+                ),
+              ),
+            )
+                : SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: MasonryGridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 8.0,
-                    mainAxisSpacing: 8.0,
+                  gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
                   ),
-                  itemCount: docs.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    var doc = docs[index];
+                  mainAxisSpacing: 6,
+                  crossAxisSpacing: 5,
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    var doc = posts[index];
                     return PostItem(
-                      postUrl: doc['postUrl'],
+                      post: doc.data()!,
                     );
                   },
-                );
-              },
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
+  Column _buildStatColumn(String label, int? count) {
+    return Column(
+      children: [
+        Text(
+          count?.toString() ?? '0',
+          style: const TextStyle(
+            fontSize: 15,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 15,
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class PostItem extends StatefulWidget {
-  final String postUrl;
+  final Map<String, dynamic> post;
 
-  const PostItem({Key? key, required this.postUrl}) : super(key: key);
+  const PostItem({super.key, required this.post});
 
   @override
   _PostItemState createState() => _PostItemState();
@@ -277,19 +273,23 @@ class _PostItemState extends State<PostItem>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Ensure to call super.build(context) to maintain state
+    super.build(context);
 
     return GestureDetector(
       onTap: () {
-        // Handle onTap event
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          image: DecorationImage(
-            image: NetworkImage(widget.postUrl),
-            fit: BoxFit.cover,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FullPostScreen(post: widget.post),
           ),
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(5.0),
+        child: CachedNetworkImage(
+          imageUrl: widget.post['postUrl'] ?? '',
+          fit: BoxFit.cover,
+          errorWidget: (context, url, error) => const Icon(Icons.error),
         ),
       ),
     );

@@ -3,14 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Snapchat extends StatefulWidget {
-  const Snapchat({Key? key}) : super(key: key);
+  const Snapchat({super.key});
 
   @override
   State<Snapchat> createState() => _SnapchatState();
 }
 
 class _SnapchatState extends State<Snapchat> {
-  TextEditingController _idController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
   final _formKey = GlobalKey<FormState>(); // Form key for form validation
   String _successMessage = '';
   bool _isEditing = false;
@@ -42,14 +42,14 @@ class _SnapchatState extends State<Snapchat> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
+        title: const Text(
           'Sharing Social Media IDs',
           style: TextStyle(
             color: Colors.white,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -63,7 +63,7 @@ class _SnapchatState extends State<Snapchat> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
+              const Text(
                 'Snapchat ID Sharing',
                 style: TextStyle(
                   color: Colors.white,
@@ -71,25 +71,25 @@ class _SnapchatState extends State<Snapchat> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 10),
-              Text(
+              const SizedBox(height: 10),
+              const Text(
                 'Sharing your ID will display to other users who are nearby you.',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Stack(
                 alignment: Alignment.centerRight,
                 children: [
                   TextFormField(
                     controller: _idController,
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                     enabled: _isEditing,
                     decoration: InputDecoration(
                       hintText: 'Enter your Snapchat ID',
-                      hintStyle: TextStyle(color: Colors.grey),
+                      hintStyle: const TextStyle(color: Colors.grey),
                       fillColor: Colors.grey[900],
                       filled: true,
                       border: OutlineInputBorder(
@@ -120,7 +120,7 @@ class _SnapchatState extends State<Snapchat> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   // Validate form before updating
@@ -129,20 +129,20 @@ class _SnapchatState extends State<Snapchat> {
                   }
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.blue),
+                  backgroundColor: WidgetStateProperty.all(Colors.blue),
                 ),
-                child: Text(
+                child: const Text(
                   'Update',
                   style: TextStyle(
                     color: Colors.white,
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (_successMessage.isNotEmpty)
                 Text(
                   _successMessage,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.green,
                     fontSize: 16,
                   ),
@@ -171,12 +171,9 @@ class _SnapchatState extends State<Snapchat> {
         setState(() {
           _successMessage = 'Snapchat ID updated successfully';
         });
-        print('Snapchat ID updated successfully');
       }).catchError((error) {
-        print('Error updating Snapchat ID: $error');
       });
     } else {
-      print('No user is currently signed in');
     }
   }
 

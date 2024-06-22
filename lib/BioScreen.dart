@@ -11,14 +11,14 @@ class BioScreen extends StatefulWidget {
   final String phone;
 
   const BioScreen({
-    Key? key,
+    super.key,
     required this.name,
     required this.birth,
     required this.gender,
     required this.email,
     required this.password,
     required this.phone,
-  }) : super(key: key);
+  });
 
   @override
   State<BioScreen> createState() => _BioScreenState();
@@ -84,8 +84,8 @@ class _BioScreenState extends State<BioScreen> {
               },
 
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                backgroundColor: WidgetStateProperty.all<Color>(Colors.blue),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0), // Adjust border radius
                   ),

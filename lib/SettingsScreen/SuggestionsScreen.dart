@@ -3,21 +3,21 @@ import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 
 class SuggestionsScreen extends StatelessWidget {
-  const SuggestionsScreen({Key? key}) : super(key: key);
+  const SuggestionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController _suggestionController = TextEditingController();
+    TextEditingController suggestionController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
+        title: const Text(
           'Suggestions',
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -32,7 +32,7 @@ class SuggestionsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            const Text(
               'We appreciate your suggestions!',
               style: TextStyle(
                 fontSize: 18.0,
@@ -40,21 +40,21 @@ class SuggestionsScreen extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
-              controller: _suggestionController,
+              controller: suggestionController,
               decoration: InputDecoration(
                 hintText: 'Enter your suggestion',
-                hintStyle: TextStyle(color: Colors.white),
+                hintStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
+                  borderSide: const BorderSide(color: Colors.white),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
               maxLines: 5,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
@@ -63,8 +63,8 @@ class SuggestionsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: Text(
                   'Submit',
                   style: TextStyle(

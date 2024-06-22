@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdateNameScreen extends StatefulWidget {
-  const UpdateNameScreen({Key? key}) : super(key: key);
+  const UpdateNameScreen({super.key});
 
   @override
   _UpdateNameScreenState createState() => _UpdateNameScreenState();
@@ -32,12 +32,12 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Name updated successfully', style: TextStyle(color: Colors.green))),
+          const SnackBar(content: Text('Name updated successfully', style: TextStyle(color: Colors.green))),
         );
 
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update name: $e', style: TextStyle(color: Colors.red))),
+          SnackBar(content: Text('Failed to update name: $e', style: const TextStyle(color: Colors.red))),
         );
       }
     } else {
@@ -53,12 +53,12 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
+        title: const Text(
           'Update Name',
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -74,12 +74,12 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
               decoration: BoxDecoration(
                 color: Colors.grey.shade800.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: Center(
+              child: const Center(
                 child: Text(
                   'The updated name will be visible in the profile page',
                   style: TextStyle(
@@ -90,19 +90,19 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
                 labelText: 'Enter new name',
-                labelStyle: TextStyle(color: Colors.white), // Changed label text color to white
+                labelStyle: const TextStyle(color: Colors.white), // Changed label text color to white
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              style: TextStyle(color: Colors.white), // Changed input text color to white
+              style: const TextStyle(color: Colors.white), // Changed input text color to white
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _updateName,
               style: ElevatedButton.styleFrom(
@@ -111,8 +111,8 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: Text(
                   'Update',
                   style: TextStyle(
@@ -124,8 +124,8 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
               ),
             ),
             if (_showErrorMessage)
-              Padding(
-                padding: const EdgeInsets.only(top: 10.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 10.0),
                 child: Text(
                   'Please enter a valid name',
                   style: TextStyle(
@@ -136,8 +136,8 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
                 ),
               ),
             if (_isNameUpdated)
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 20.0),
                 child: Text(
                   'Name updated successfully',
                   style: TextStyle(

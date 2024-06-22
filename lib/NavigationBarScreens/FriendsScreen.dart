@@ -6,7 +6,7 @@ import '../providers/user_provider.dart';
 import 'profile_screen.dart'; // Import the ProfileScreen
 
 class FriendsScreen extends StatefulWidget {
-  const FriendsScreen({Key? key}) : super(key: key);
+  const FriendsScreen({super.key});
 
   @override
   _FriendsScreenState createState() => _FriendsScreenState();
@@ -18,22 +18,22 @@ class _FriendsScreenState extends State<FriendsScreen> {
   @override
   void initState() {
     super.initState();
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final currentUser = userProvider.getUser;
-    if (currentUser != null) {
-      final currentUserId = currentUser.uid;
-      userProvider.fetchFriends(currentUserId);
-    } else {
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final currentUser = userProvider.getUser;
+      if (currentUser != null) {
+        final currentUserId = currentUser.uid;
+        userProvider.fetchFriends(currentUserId);
+      }
+    });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Explicitly control the back button
         backgroundColor: Colors.black,
         elevation: 0,
         title: Padding(
@@ -52,8 +52,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.search_rounded, color: Colors.white70),
-                      SizedBox(width: 8),
+                      const Icon(Icons.search_rounded, color: Colors.white70),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
                           onChanged: (value) {
@@ -123,10 +123,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   return _buildUserRows(filteredUsers);
                 } else {
                   // Handle case where no friends data is available
-                  return Center(
+                  return const Center(
                     child: Text(
                       'No friends available',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
                     ),
                   );
                 }
@@ -167,6 +167,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
       // If the current row is full or it's the last user, add the row to the list of rows
       if (currentRowUsers.length == 3 || i == users.length - 1) {
+        // If less than 3 users in the current row, add empty Expanded widgets
+        while (currentRowUsers.length < 3) {
+          currentRowUsers.add(Expanded(child: Container()));
+        }
+
         rows.add(
           Padding(
             padding: const EdgeInsets.only(bottom: 20.0),
@@ -192,19 +197,19 @@ class UserProfile extends StatelessWidget {
   final bool isCurrentUser;
 
   const UserProfile({
-    Key? key,
+    super.key,
     required this.user,
     this.isCurrentUser = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          width: 60, // Adjust the size as needed
-          height: 60, // Adjust the size as needed
-          decoration: BoxDecoration(
+          width: 65, // Adjust the size as needed
+          height: 65, // Adjust the size as needed
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.grey, // Placeholder color
           ),
@@ -212,18 +217,21 @@ class UserProfile extends StatelessWidget {
               ? CircleAvatar(
             backgroundImage: NetworkImage(user.photoUrl),
             radius: 30,
-            backgroundColor: isCurrentUser
-                ? Colors.grey
-                : Colors.transparent, // Example: Set background color for the current user
+            backgroundColor:
+            isCurrentUser ? Colors.grey : Colors.transparent,
           )
-              : SizedBox(), // Empty SizedBox when photoUrl is empty
+              : const Icon(
+            Icons.person,
+            size: 40, // Adjust size as needed
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 5),
         Text(
           user.username,
           style: TextStyle(
             color: isCurrentUser ? Colors.green : Colors.white,
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -231,3 +239,4 @@ class UserProfile extends StatelessWidget {
     );
   }
 }
+//updated code version

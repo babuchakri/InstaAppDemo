@@ -93,16 +93,16 @@ class _EmailPasswordScreenState extends State<EmailPasswordScreen> {
               },
 
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                backgroundColor: WidgetStateProperty.all<Color>(Colors.blue),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0), // Adjust border radius
                   ),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: const Text('Continue',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 25),),
+              child: const Padding(
+                padding: EdgeInsets.all(5.0),
+                child: Text('Continue',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 25),),
               ),
 
             )),

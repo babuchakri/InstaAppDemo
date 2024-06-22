@@ -5,7 +5,7 @@ import 'package:login_form_one/LoginScreen.dart';
 import 'package:login_form_one/resources/auth_models.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'Utils/utils.dart';
 
 class ProfilePickerScreen extends StatefulWidget {
@@ -47,8 +47,22 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
       // Handle the case when the user denies location permission
       // You can show an error message or request permission again
       // For simplicity, we'll just go back to the previous screen
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
+  }
+
+  String getCurrentLocale(BuildContext context) {
+    Locale locale = Localizations.localeOf(context);
+    return locale.toLanguageTag(); // Returns locale as a string, e.g., "en-US"
+  }
+
+  void setFirebaseAuthLocale(String locale) {
+    if (locale.isEmpty) {
+      locale = 'en-US'; // Set a default locale if none is available
+    }
+    FirebaseAuth.instance.setLanguageCode(locale);
   }
 
   void selectImage() async {
@@ -62,14 +76,20 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
 
   void signUpUser() async {
     if (_image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile pic is required'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile pic is required'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
+
+    // Retrieve the locale before entering the async gap
+    String locale = getCurrentLocale(context);
+    setFirebaseAuthLocale(locale);
 
     setState(() {
       _isLoading = true;
@@ -85,15 +105,18 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
       file: _image!,
     );
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = false;
     });
 
     if (res == 'success') {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
+
       Fluttertoast.showToast(
         msg: 'Registration Successful',
         toastLength: Toast.LENGTH_SHORT,
@@ -107,7 +130,6 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
       showSnackBar(res, context);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +179,6 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
                   ),
               ],
             ),
-
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: signUpUser,
@@ -181,7 +202,6 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 25),
               ),
             ),
-
           ],
         ),
       ),

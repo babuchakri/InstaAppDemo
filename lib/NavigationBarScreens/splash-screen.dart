@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:login_form_one/responsive/mobile_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();

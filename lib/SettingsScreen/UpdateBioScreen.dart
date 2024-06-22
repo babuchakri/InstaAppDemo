@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_form_one/SettingsScreen/settings_screen.dart';
 
 class UpdateBioScreen extends StatefulWidget {
-  const UpdateBioScreen({Key? key}) : super(key: key);
+  const UpdateBioScreen({super.key});
 
   @override
   State<UpdateBioScreen> createState() => _UpdateBioScreenState();
@@ -48,12 +48,12 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
+        title: const Text(
           'Update Bio',
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -69,12 +69,12 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
               decoration: BoxDecoration(
                 color: Colors.grey.shade800.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: Center(
+              child: const Center(
                 child: Text(
                   'The updated bio will appear in the profile screen',
                   style: TextStyle(
@@ -85,32 +85,32 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextFormField(
               controller: _bioController,
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'Type your bio here...',
-                hintStyle: TextStyle(color: Colors.white),
+                hintStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             if (_errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
                   _errorMessage!,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14.0,
                     color: Colors.red,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _updateBio,
               style: ElevatedButton.styleFrom(
@@ -119,8 +119,8 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: Text(
                   'Update',
                   style: TextStyle(
@@ -132,8 +132,8 @@ class _UpdateBioScreenState extends State<UpdateBioScreen> {
               ),
             ),
             if (_isBioUpdated)
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 20.0),
                 child: Text(
                   'Bio updated successfully',
                   style: TextStyle(
