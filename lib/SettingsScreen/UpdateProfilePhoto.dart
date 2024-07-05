@@ -76,7 +76,7 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
         backgroundColor: Colors.black,
         title: const Text('Update Profile Photo', style: TextStyle(color: Colors.white)),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -108,26 +108,28 @@ class _UpdateProfilePhotoState extends State<UpdateProfilePhoto> {
             const SizedBox(height: 16.0),
             GestureDetector(
               onTap: _pickImage,
-              child: Container(
-                width: 150.0,
-                height: 150.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey,
-                  image: _selectedImage != null
-                      ? DecorationImage(
-                    image: FileImage(_selectedImage!),
-                    fit: BoxFit.cover,
+              child: FractionallySizedBox(
+                widthFactor: 0.5, // Occupy half the width
+                child: Container(
+                  height: 230.0,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    image: _selectedImage != null
+                        ? DecorationImage(
+                      image: FileImage(_selectedImage!),
+                      fit: BoxFit.cover,
+                    )
+                        : null,
+                    borderRadius: BorderRadius.circular(8.0), // Optional: for rounded corners
+                  ),
+                  child: _selectedImage == null
+                      ? const Icon(
+                    Icons.camera_alt,
+                    color: Colors.white,
+                    size: 50.0,
                   )
                       : null,
                 ),
-                child: _selectedImage == null
-                    ? const Icon(
-                  Icons.camera_alt,
-                  color: Colors.white,
-                  size: 50.0,
-                )
-                    : null,
               ),
             ),
             const SizedBox(height: 20.0),

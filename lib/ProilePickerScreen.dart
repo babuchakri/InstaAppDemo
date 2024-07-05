@@ -137,7 +137,7 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
       appBar: AppBar(
         // Use leading property to add the back button
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Registration', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
@@ -191,8 +191,8 @@ class _ProfilePickerScreenState extends State<ProfilePickerScreen> {
               ),
               child: _isLoading
                   ? const SizedBox(
-                width: 10.0, // Adjust the size as needed
-                height: 10.0, // Adjust the size as needed
+                width: 20.0, // Adjust the size as needed
+                height: 20.0, // Adjust the size as needed
                 child: CircularProgressIndicator(
                   color: Colors.white,
                 ),

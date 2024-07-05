@@ -16,6 +16,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isPasswordUpdated = false;
+  bool _showSuccessMessage = false;
 
   void _updatePassword() async {
     String currentPassword = _currentPasswordController.text.trim();
@@ -42,31 +43,43 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
             'password': newPassword,
           });
 
-          setState(() {
-            _isPasswordUpdated = true;
+          if (mounted) {
+            setState(() {
+              _isPasswordUpdated = true;
+              _showSuccessMessage = true;
+            });
+          }
+
+          // Delay navigation to ensure setState has completed
+          Future.delayed(Duration.zero, () {
+            _navigateToSettingsScreen();
           });
-
-          // Show a success message
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Password updated successfully', style: TextStyle(color: Colors.green))),
-          );
-
-          // Navigate back to settings screen
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const SettingsScreen()),
-          );
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update password: $e', style: const TextStyle(color: Colors.red))),
-        );
+        if (mounted) {
+          setState(() {
+            _isPasswordUpdated = false;
+            _showSuccessMessage = false;
+          });
+        }
+
+        debugPrint('Failed to update password: $e');
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter both current and new password', style: TextStyle(color: Colors.red))),
-      );
+      if (mounted) {
+        setState(() {
+          _showSuccessMessage = false;
+        });
+      }
+      debugPrint('Please enter both current and new password');
     }
+  }
+
+  void _navigateToSettingsScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
   }
 
   @override
@@ -79,12 +92,9 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            );
+            _navigateToSettingsScreen();
           },
         ),
       ),
@@ -160,7 +170,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                 ),
               ),
             ),
-            if (_isPasswordUpdated)
+            if (_showSuccessMessage)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 10.0),
                 child: Text(

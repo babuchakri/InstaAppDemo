@@ -17,7 +17,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios), // Back arrow icon
+          icon: const Icon(Icons.arrow_back), // Back arrow icon
           onPressed: () {
             Navigator.push(
               context,
@@ -55,7 +55,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           controller: _nameController,
                           keyboardType: TextInputType.name,
                           decoration: const InputDecoration(
-                            labelText: 'Full name',
+                            labelText: 'name',
                             border: OutlineInputBorder(),
                           ),
                         ),

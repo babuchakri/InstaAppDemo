@@ -26,7 +26,7 @@ class User {
     required this.uid,
     required this.username,
     this.snapchatId, // Initialize it in the constructor
-    this.instagramId, // Initialize it in the constructor
+     this.instagramId, // Initialize it in the constructor
     this.facebookId, // Initialize it in the constructor
 
     required this.email,

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:login_form_one/LoginScreen.dart';
+import 'package:login_form_one/NavigationBarScreens/splash-screen.dart';
 import 'package:login_form_one/providers/user_provider.dart';
 import 'package:login_form_one/responsive/responsive_screen.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +24,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,33 +34,37 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        // home: ResponsiveScreen(
-        // mobileScreen: MobileScreen(),
-        // )
-        home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.active) {
-              if (snapshot.hasData) {
-                return const ResponsiveScreen(mobileScreen: LoginScreen());
-              }
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('${snapshot.error}'),
-              );
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-              );
-            }
-
-            return const LoginScreen();
-          },
-        ),
+        // Define initial screen based on authentication state
+        home: AuthWrapper(),
       ),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // While waiting for connection, show loading indicator
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          );
+        } else {
+          // Determine which screen to show based on authentication state
+          if (snapshot.hasData) {
+            // If user is authenticated, show the ResponsiveScreen with the LoginScreen
+            return const ResponsiveScreen(mobileScreen: SplashScreen());
+          } else {
+            // If user is not authenticated, show the LoginScreen
+            return const LoginScreen();
+          }
+        }
+      },
     );
   }
 }

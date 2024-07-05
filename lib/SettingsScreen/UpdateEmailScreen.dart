@@ -16,6 +16,20 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _verificationEmailSent = false;
   bool _emailUpdated = false;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
+  GlobalKey<ScaffoldMessengerState>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Listen to user changes
+    _auth.userChanges().listen((User? user) {
+      if (user != null && _verificationEmailSent) {
+        _checkEmailVerified();
+      }
+    });
+  }
 
   void _updateEmail() async {
     String newEmail = _emailController.text.trim();
@@ -33,12 +47,12 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
           });
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        _scaffoldKey.currentState?.showSnackBar(
           SnackBar(content: Text('Failed to send verification email: $e')),
         );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      _scaffoldKey.currentState?.showSnackBar(
         const SnackBar(content: Text('Please enter a valid email')),
       );
     }
@@ -59,11 +73,11 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
           _verificationEmailSent = false; // Hide verification message
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
+        _scaffoldKey.currentState?.showSnackBar(
           const SnackBar(content: Text('Email updated successfully')),
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        _scaffoldKey.currentState?.showSnackBar(
           SnackBar(content: Text('Failed to update email in Firestore: $e')),
         );
       }
@@ -71,109 +85,100 @@ class _UpdateEmailScreenState extends State<UpdateEmailScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-
-    // Periodically check if the email is verified
-    _auth.userChanges().listen((User? user) {
-      if (user != null && _verificationEmailSent) {
-        _checkEmailVerified();
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: const Text(
-          'Update Email',
-          style: TextStyle(color: Colors.white),
+    return ScaffoldMessenger(
+      key: _scaffoldKey,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          title: const Text(
+            'Update Email',
+            style: TextStyle(color: Colors.white),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            );
-          },
-        ),
-      ),
-      body: Container(
-        color: Colors.black,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade800.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: const Center(
-                child: Text(
-                  'The updated email will be used for notifications',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+        body: Container(
+          color: Colors.black,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade800.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: const Center(
+                  child: Text(
+                    'The updated email will be used for notifications',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Enter new email',
-                labelStyle: const TextStyle(color: Colors.white),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+              const SizedBox(height: 16.0),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Enter new email',
+                  labelStyle: const TextStyle(color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
+                style: const TextStyle(color: Colors.white),
               ),
-              style: const TextStyle(color: Colors.white),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _updateEmail,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _updateEmail,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.0),
-                child: Text(
-                  'Update',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 23.0,
-                    fontWeight: FontWeight.bold,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                  child: Text(
+                    'Update',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 23.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-            if (_verificationEmailSent) ...[
-              const SizedBox(height: 16.0),
-              const Text(
-                'Verification link sent to your email. Please verify.',
-                style: TextStyle(color: Colors.yellow),
-                textAlign: TextAlign.center,
-              ),
+              if (_verificationEmailSent) ...[
+                const SizedBox(height: 16.0),
+                const Text(
+                  'Verification link sent to your email. Please verify.',
+                  style: TextStyle(color: Colors.yellow),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (_emailUpdated) ...[
+                const SizedBox(height: 16.0),
+                const Text(
+                  'Email updated successfully!',
+                  style: TextStyle(color: Colors.green),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ],
-            if (_emailUpdated) ...[
-              const SizedBox(height: 16.0),
-              const Text(
-                'Email updated successfully!',
-                style: TextStyle(color: Colors.green),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

@@ -6,10 +6,10 @@ import 'package:login_form_one/resources/firestore_methods.dart';
 import 'package:provider/provider.dart';
 
 class AddPostScreen extends StatefulWidget {
-  const AddPostScreen({super.key});
+  const AddPostScreen({Key? key});
 
   @override
-  State<AddPostScreen> createState() => _AddPostScreenState();
+  _AddPostScreenState createState() => _AddPostScreenState();
 }
 
 class _AddPostScreenState extends State<AddPostScreen> {
@@ -32,8 +32,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
       _isLoading = true;
       _showImageError = false;
     });
+
     try {
-      String res = await FireStoreMethods().uploadPost(
+      final res = await FireStoreMethods().uploadPost(
         _descriptionController.text,
         _file!,
         uid,
@@ -52,8 +53,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
         setState(() {
           _isLoading = false;
           _showSuccessMessage = false;
+          _showImageError = true;
         });
-        _showImageError = true;
       }
     } catch (e) {
       setState(() {
@@ -114,11 +115,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
               onPressed: clearImage,
             ),
           TextButton(
-            onPressed: () => postImage(
-              user!.uid,
-              user.username,
-              user.photoUrl,
-            ),
+            onPressed: () {
+              if (user != null) {
+                postImage(user.uid, user.username, user.photoUrl);
+              }
+            },
             child: const Text(
               "post",
               style: TextStyle(
@@ -215,3 +216,4 @@ class _AddPostScreenState extends State<AddPostScreen> {
     );
   }
 }
+//updated version

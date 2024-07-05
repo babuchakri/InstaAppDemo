@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,7 +14,8 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
-class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMixin {
+class _FeedScreenState extends State<FeedScreen>
+    with AutomaticKeepAliveClientMixin {
   final List<DocumentSnapshot<Map<String, dynamic>>> _cachedPosts = [];
   bool _isLoadingMore = false;
   late ScrollController _scrollController;
@@ -69,7 +72,8 @@ class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMi
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       if (!_isLoadingMore) {
         _loadPosts();
       }
@@ -81,9 +85,7 @@ class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMi
       future: _fetchCrushOfTheDay(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center();
         }
 
         if (!snapshot.hasData || !snapshot.data!.exists) {
@@ -128,12 +130,13 @@ class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMi
                   onTap: () {
                     _showProfileDialog(crushData['photoUrl']);
                   },
-                  child:  ClipRRect(
+                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(60),
                     child: Center(
                       child: CircleAvatar(
                         radius: 60,
-                        backgroundImage: CachedNetworkImageProvider(crushData['photoUrl']),
+                        backgroundImage:
+                            CachedNetworkImageProvider(crushData['photoUrl']),
                       ),
                     ),
                   ),
@@ -141,7 +144,7 @@ class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMi
                 const SizedBox(height: 20),
                 const Center(
                   child: Text(
-                    "Today's most loved profile",
+                    "Today's most loved profile's",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -167,15 +170,20 @@ class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMi
             onTap: () {
               Navigator.of(context).pop();
             },
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.width * 0.8, // Adjust height to maintain aspect ratio
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 0), // Adjust border width as needed
-                image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: NetworkImage(imageUrl),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 13.0, sigmaY: 13.0),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: MediaQuery.of(context).size.width *
+                    0.8, // Adjust height to maintain aspect ratio
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 0),
+                  // Adjust border width as needed
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: NetworkImage(imageUrl),
+                  ),
                 ),
               ),
             ),
@@ -191,11 +199,12 @@ class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMi
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Disable the automatic back button
+        automaticallyImplyLeading: false,
+        // Disable the automatic back button
         elevation: 0,
         backgroundColor: Colors.black45,
         title: const Text(
-          "connect",
+          "connect_me",
           style: TextStyle(
             color: Colors.white,
             fontSize: 24,
@@ -209,7 +218,8 @@ class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMi
               AssetImage('lib/images/babu.png'),
               size: 21,
               color: Colors.white,
-            ),            onPressed: () {
+            ),
+            onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -303,7 +313,8 @@ class _FeedScreenState extends State<FeedScreen> with AutomaticKeepAliveClientMi
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> _fetchCrushOfTheDay() async {
-    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
         .collection('users')
         .orderBy('hearts', descending: true)
         .limit(1)

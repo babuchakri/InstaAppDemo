@@ -121,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             _buildSectionHeading('Share Social Media Accounts'),
 
-            _buildSocialMediaItem('Facebook', Icons.facebook, () {
+            _buildSocialMediaItem('Facebook', Icons.edit, () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const Facebook()),
@@ -133,7 +133,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               });
             }),
 
-            _buildSocialMediaItem('Snapchat', Icons.snapchat, () {
+            _buildSocialMediaItem('Snapchat', Icons.edit, () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const Snapchat()),
@@ -145,7 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               });
             }),
 
-            _buildSocialMediaItem('Instagram', Icons.camera, () {
+            _buildSocialMediaItem('Instagram', Icons.edit, () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const Instagram()),
@@ -205,8 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 20),
             _buildSectionHeading('Personal Information'),
             _buildInfoItem('Email', useremail, Icons.email),
-            _buildInfoItem('Number', usernumber, Icons.phone),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             _buildSectionHeading('Manage privacy'),
             _buildSettingsItem('Privacy', Icons.privacy_tip, () {
               // Privacy logic

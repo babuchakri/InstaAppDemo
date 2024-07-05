@@ -155,7 +155,11 @@ class _FullPostScreenState extends State<FullPostScreen> {
                           Row(
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.comment, color: Colors.grey),
+                                icon: const ImageIcon(
+                                  AssetImage('lib/images/comment_three.png'),
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -169,11 +173,7 @@ class _FullPostScreenState extends State<FullPostScreen> {
                                 '$commentCount',
                                 style: const TextStyle(color: Colors.white),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.poll_outlined, color: Colors.grey),
-                                onPressed: () {},
-                                iconSize: 20,
-                              ),
+
                               IconButton(
                                 icon: Icon(
                                   isLiked ? Icons.favorite : Icons.favorite_border,
@@ -188,11 +188,7 @@ class _FullPostScreenState extends State<FullPostScreen> {
                               ),
                             ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.share, color: Colors.grey),
-                            onPressed: () {},
-                            iconSize: 20,
-                          ),
+
                         ],
                       ),
                     ],

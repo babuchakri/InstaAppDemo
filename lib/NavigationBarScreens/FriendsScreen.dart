@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -33,210 +34,173 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Explicitly control the back button
+
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.black,
         elevation: 0,
         title: Padding(
-          padding: const EdgeInsets.only(top: 58.0),
+          padding: const EdgeInsets.only(top: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: Container(
-                  height: 35,
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF323232),
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search_rounded, color: Colors.white70),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value;
-                            });
-                          },
-                          decoration: const InputDecoration(
-                            hintText: "Search",
-                            hintStyle: TextStyle(color: Colors.grey),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
-                            isCollapsed: true,
-                          ),
-                          style: const TextStyle(color: Colors.white),
+              Container(
+                height: 37,
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF323232),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search_rounded, color: Colors.white70),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          hintText: "Search",
+                          hintStyle: TextStyle(color: Colors.grey),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          isCollapsed: true,
                         ),
+                        style: const TextStyle(color: Colors.white),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
             ],
           ),
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            // Display current user profile
-            Consumer<UserProvider>(
-              builder: (context, userProvider, child) {
-                User? currentUser = userProvider.getUser;
-                return currentUser != null
-                    ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 25),
-                      child: UserProfile(
-                        user: currentUser,
-                        isCurrentUser: true,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                  ],
-                )
-                    : const SizedBox.shrink();
-              },
-            ),
-            const SizedBox(height: 10),
-            // Display selected user profiles
-            Consumer<UserProvider>(
-              builder: (context, userProvider, child) {
-                // Retrieve friends' data from the provider
-                List<User>? selectedUsers = userProvider.friends;
-                if (selectedUsers.isNotEmpty) {
-                  // Filter selected users based on search query
-                  List<User> filteredUsers = selectedUsers
-                      .where((user) => user.username
-                      .toLowerCase()
-                      .contains(_searchQuery.toLowerCase()))
-                      .toList();
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Display friends
+              Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  List<User>? selectedUsers = userProvider.friends;
+                  if (selectedUsers.isNotEmpty) {
+                    List<User> filteredUsers = selectedUsers
+                        .where((user) => user.username
+                        .toLowerCase()
+                        .contains(_searchQuery.toLowerCase()))
+                        .toList();
 
-                  return _buildUserRows(filteredUsers);
-                } else {
-                  // Handle case where no friends data is available
-                  return const Center(
-                    child: Text(
-                      'No friends available',
-                      style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+                    return _buildUserGrid(filteredUsers);
+                  } else {
+                    return const Center(
+                      child: Text(
+                        'No friends available',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildUserRows(List<User> users) {
-    List<Widget> rows = [];
-    List<Widget> currentRowUsers = [];
-
-    for (int i = 0; i < users.length; i++) {
-      currentRowUsers.add(
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileScreen(
-                    uid: users[i].uid,
-                    currentUserId: '', // Ensure this is populated correctly
-                  ),
+  Widget _buildUserGrid(List<User> users) {
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 45,
+        mainAxisSpacing: 15,
+      ),
+      itemCount: users.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfileScreen(
+                  uid: users[index].uid,
+                  currentUserId: '', // Ensure this is populated correctly
                 ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: UserProfile(user: users[i]),
-            ),
-          ),
-        ),
-      );
-
-      // If the current row is full or it's the last user, add the row to the list of rows
-      if (currentRowUsers.length == 3 || i == users.length - 1) {
-        // If less than 3 users in the current row, add empty Expanded widgets
-        while (currentRowUsers.length < 3) {
-          currentRowUsers.add(Expanded(child: Container()));
-        }
-
-        rows.add(
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: currentRowUsers,
-            ),
-          ),
+              ),
+            );
+          },
+          child: UserProfile(user: users[index]),
         );
-        currentRowUsers = []; // Clear the current row users list for the next row
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: rows,
+      },
     );
   }
 }
-
 class UserProfile extends StatelessWidget {
   final User user;
   final bool isCurrentUser;
 
   const UserProfile({
-    super.key,
+    Key? key,
     required this.user,
     this.isCurrentUser = false,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          width: 65, // Adjust the size as needed
-          height: 65, // Adjust the size as needed
-          decoration: const BoxDecoration(
+          width: 63,
+          height: 63,
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.grey, // Placeholder color
+            gradient: const LinearGradient(
+              colors: [Colors.grey, Colors.black],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(
+              color: Colors.white,
+              width: 0.7,
+            ),
           ),
-          child: user.photoUrl.isNotEmpty
-              ? CircleAvatar(
-            backgroundImage: NetworkImage(user.photoUrl),
-            radius: 30,
-            backgroundColor:
-            isCurrentUser ? Colors.grey : Colors.transparent,
-          )
-              : const Icon(
-            Icons.person,
-            size: 40, // Adjust size as needed
-            color: Colors.white,
+          child: ClipOval(
+            child: user.photoUrl.isNotEmpty
+                ? CachedNetworkImage(
+              imageUrl: user.photoUrl,
+              fit: BoxFit.cover,
+              width: 65,
+              height: 65,
+            )
+                : const Icon(
+              Icons.person,
+              size: 40,
+              color: Colors.white,
+            ),
           ),
         ),
         const SizedBox(height: 5),
-        Text(
-          user.username,
-          style: TextStyle(
-            color: isCurrentUser ? Colors.green : Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
+        Flexible(
+          child: Text(
+            user.username,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: isCurrentUser ? Colors.green : Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
     );
   }
 }
-//updated code version

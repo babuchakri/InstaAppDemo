@@ -103,7 +103,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             return const Center(
               child: Text(
                 'No notifications found',
-                style: TextStyle(color: Colors.white),
+
+                style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 25),
               ),
             );
           }

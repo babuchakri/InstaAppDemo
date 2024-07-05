@@ -28,7 +28,7 @@ class _EmailPasswordScreenState extends State<EmailPasswordScreen> {
       appBar: AppBar(
         // Use leading property to add the back button
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Registration',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),

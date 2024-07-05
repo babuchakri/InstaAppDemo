@@ -15,6 +15,8 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
   bool _isNameUpdated = false;
   bool _showErrorMessage = false; // Added to track whether to show the error message
 
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
   void _updateName() async {
     String newName = _nameController.text.trim();
     User? currentUser = FirebaseAuth.instance.currentUser;
@@ -31,14 +33,10 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
           _showErrorMessage = false; // Reset error message flag
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Name updated successfully', style: TextStyle(color: Colors.green))),
-        );
+        _showSnackBar('Name updated successfully', Colors.green);
 
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update name: $e', style: const TextStyle(color: Colors.red))),
-        );
+        _showSnackBar('Failed to update name: $e', Colors.red);
       }
     } else {
       // Show error message if name is empty
@@ -48,9 +46,16 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
     }
   }
 
+  void _showSnackBar(String message, Color color) {
+    _scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(content: Text(message, style: TextStyle(color: color))),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldMessengerKey,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text(
@@ -58,7 +63,7 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
